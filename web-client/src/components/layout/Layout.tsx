@@ -2,7 +2,7 @@ import React from "react";
 import ResponsiveDrawer from "./ResponsiveDrawer";
 import DrawerContent from "./DrawerContent";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import Box from "@mui/material/Box";
 import { IUserState } from "../../app/features/user/userSlice";
 import { IStore } from "../../app/store";
@@ -20,7 +20,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     console.log(user);
 
     const onClick = (buttonClick: string) => {
-        navigate(`/${buttonClick}`);
+        const targetUrl = `/${buttonClick === "Home" ? "" : buttonClick}`;
+        navigate(targetUrl);
     };
 
     return (

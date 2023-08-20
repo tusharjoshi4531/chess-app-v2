@@ -74,12 +74,18 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
                 <List>
                     <ListItem>
                         <ListItemButton>
-                            <ListItemText primary="Login" />
+                            <ListItemText
+                                primary="Login"
+                                onClick={onClick.bind(this, "Login")}
+                            />
                         </ListItemButton>
                     </ListItem>
                     <ListItem>
                         <ListItemButton>
-                            <ListItemText primary="Signup" />
+                            <ListItemText
+                                primary="Signup"
+                                onClick={onClick.bind(this, "Signup")}
+                            />
                         </ListItemButton>
                     </ListItem>
                 </List>
