@@ -19,16 +19,25 @@ import {
     verifyAccessToken,
     verifyRefreshToken,
 } from "../services/jwt.service";
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
+import { IUserDoc } from "../model/user.model";
+import _ from "lodash";
+
+const removePassword = (data: Document) => {
+    const user = { ..._.omit(data.toObject(), ["password"]) };
+    // console.log(user);
+    return user;
+};
 
 export const signup: RequestHandler<{}, {}, ISignupReqBody, {}> = async (
     req,
     res
 ) => {
     try {
-        const user = await createUser(req.body);
+        const userDoc = await createUser(req.body);
+        const userPayload = userDoc2Paylod(userDoc);
+        const user = removePassword(userDoc);
         console.log(user);
-        const userPayload = userDoc2Paylod(user);
         const [accessToken, refreshToken] = generateTokens(userPayload);
         saveRefreshToken(refreshToken, user._id);
 
@@ -43,8 +52,10 @@ export const login: RequestHandler<{}, {}, ILoginReqBody, {}> = async (
     res
 ) => {
     try {
-        const user = await getUser(req.body);
-        const userPayload = userDoc2Paylod(user);
+        const userDoc = await getUser(req.body);
+        const userPayload = userDoc2Paylod(userDoc);
+        const user = removePassword(userDoc);
+        // console.log(user);
         const [accessToken, refreshToken] = generateTokens(userPayload);
         saveRefreshToken(refreshToken, user._id);
 

@@ -5,6 +5,7 @@ import { ILoginReqBody, ISignupReqBody } from "../types";
 import bcrypt from "bcrypt";
 
 // User
+
 export const createUser = async (user: ISignupReqBody): Promise<IUserDoc> => {
     const { username, password, firstname, lastname } = user;
 

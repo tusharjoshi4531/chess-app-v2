@@ -2,10 +2,11 @@ import React from "react";
 import ResponsiveDrawer from "./ResponsiveDrawer";
 import DrawerContent from "./DrawerContent";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
-import { IUserState } from "../../app/features/user/userSlice";
+import { IUserState, clearUser } from "../../app/features/user/user-slice";
 import { IStore } from "../../app/store";
+import { logout } from "../../services/auth.service";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -16,11 +17,19 @@ const drawerButtonGroups = [["Home", "Game"], ["Social"]];
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const user = useSelector<IStore, IUserState>((state) => state.user);
+    const dispatch = useDispatch();
 
     console.log(user);
 
     const onClick = (buttonClick: string) => {
-        const targetUrl = `/${buttonClick === "Home" ? "" : buttonClick}`;
+        let targetUrl = `/${buttonClick}`;
+        if (buttonClick === "Home") targetUrl = "/";
+        if (buttonClick === "Logout") {
+            dispatch(clearUser());
+            logout(user.userid);
+            return
+        }
+        if (buttonClick === "Profile") return;
         navigate(targetUrl);
     };
 

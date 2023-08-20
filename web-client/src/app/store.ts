@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer, { IUserState } from "./features/user/userSlice";
+import userReducer, { IUserState } from "./features/user/user-slice";
 
 export interface IStore {
     user: IUserState;

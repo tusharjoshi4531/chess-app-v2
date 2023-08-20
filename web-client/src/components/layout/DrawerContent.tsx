@@ -60,12 +60,18 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
                     </ListItem>
                     <ListItem>
                         <ListItemButton>
-                            <ListItemText primary="Profile" />
+                            <ListItemText
+                                primary="Profile"
+                                onClick={onClick.bind(this, "Profile")}
+                            />
                         </ListItemButton>
                     </ListItem>
                     <ListItem>
                         <ListItemButton>
-                            <ListItemText primary="Logout" />
+                            <ListItemText
+                                primary="Logout"
+                                onClick={onClick.bind(this, "Logout")}
+                            />
                         </ListItemButton>
                     </ListItem>
                 </List>

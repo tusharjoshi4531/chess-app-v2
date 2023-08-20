@@ -10,14 +10,11 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { Formik, FormikErrors } from "formik";
 import * as yup from "yup";
+import { signup } from "../../services/auth.service";
+import { ISignupData } from "../../services/types";
+import _ from "lodash";
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
-interface ISignupFormValues {
-    firstname: string;
-    lastname: string;
-    username: string;
-    password: string;
+interface ISignupFormValues extends ISignupData {
     confirmPassword: string;
 }
 
@@ -60,7 +57,9 @@ const validate = (values: ISignupFormValues) => {
 
 export default function SignUpForm() {
     const submitHandler = (values: ISignupFormValues) => {
-        console.log(values);
+        const signupData: ISignupData = _.omit(values, "confirmPassword");
+
+        signup(signupData);
     };
 
     return (
