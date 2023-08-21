@@ -7,6 +7,7 @@ import "./App.css";
 import SignUpForm from "./components/forms/SignUpForm";
 import { useSelector } from "react-redux";
 import { IStore } from "./app/store";
+import HomepageContent from "./components/homepage/HomepageContent";
 
 function App() {
     const userid = useSelector<IStore, string>((state) => state.user.userid);
@@ -14,7 +15,10 @@ function App() {
     return (
         <Layout>
             <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<HomePage />}>
+                    <Route path="" element={<HomepageContent />} />
+                    
+                </Route>
                 {userid === "" ? (
                     <>
                         <Route path="/login" element={<LoginPage />} />
