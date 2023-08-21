@@ -19,7 +19,7 @@ const authRequestWrapper = async (path: string, body: any) => {
         (url) => axios.post(url, body)
     );
 
-    response.user = transformUserData(response.user);
+    if(!error) response.user = transformUserData(response.user);
 
     return { error, status, response };
 };

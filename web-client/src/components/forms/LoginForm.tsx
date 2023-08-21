@@ -12,6 +12,7 @@ import { Formik } from "formik";
 import { login } from "../../services/auth.service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
+import { setNotification } from "../../app/features/notification/notification-slice";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -34,11 +35,25 @@ export default function LoginForm() {
         console.log(values);
 
         login(values).then(({ error, response }) => {
-            if (error) return;
+            if (error)
+                return dispatch(
+                    setNotification({
+                        body: "Couldn't login",
+                        type: "error",
+                        open: true,
+                    })
+                );
 
             const { user } = response!;
             console.log(user);
             dispatch(setUser(user));
+            dispatch(
+                setNotification({
+                    body: "Successfully Logged in",
+                    type: "success",
+                    open: true,
+                })
+            );
         });
     };
 

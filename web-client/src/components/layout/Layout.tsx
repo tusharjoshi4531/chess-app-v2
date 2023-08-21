@@ -7,6 +7,7 @@ import Box from "@mui/material/Box";
 import { IUserState, clearUser } from "../../app/features/user/user-slice";
 import { IStore } from "../../app/store";
 import { logout } from "../../services/auth.service";
+import { setNotification } from "../../app/features/notification/notification-slice";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -26,8 +27,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (buttonClick === "Home") targetUrl = "/";
         if (buttonClick === "Logout") {
             dispatch(clearUser());
+            dispatch(
+                setNotification({
+                    body: "Logged out",
+                    type: "info",
+                    open: true,
+                })
+            );
             logout(user.userid);
-            return
+            return;
         }
         if (buttonClick === "Profile") return;
         navigate(targetUrl);
