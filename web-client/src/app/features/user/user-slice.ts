@@ -1,28 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-export interface IUserState {
-    username: string;
-    userid: string;
-    firstname: string;
-    lastname: string;
-}
-
-const initialState: IUserState = {
-    username: "",
-    userid: "",
-    firstname: "",
-    lastname: "",
-};
+import { initialState } from "./types";
+import { clearUserController, setUserController } from "./action-controllers";
 
 export const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        setUser: (state, action) => {
-            state = action.payload;
-            return state;
-        },
-        clearUser: () => initialState,
+        setUser: setUserController,
+        clearUser: clearUserController,
     },
 });
 

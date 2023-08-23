@@ -9,6 +9,10 @@ import {
     CardActionArea,
 } from "@mui/material";
 import challengeUserThumbnail from "../../assets/images/challenge_user_thumbnail.jpg";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { IStore } from "../../app/store";
+import { useNotification } from "../../hooks/use-notification";
 
 interface ICustomCardButtonProps {
     title: string;
@@ -43,6 +47,15 @@ const CustomCardButton: React.FC<ICustomCardButtonProps> = ({
 };
 
 const HomepageContent = () => {
+    const navigate = useNavigate();
+    const notif = useNotification();
+    const userid = useSelector<IStore, string>((state) => state.user.userid);
+
+    const cardClickHandler = (url: string) => {
+        if (userid === "") return notif.info("Login to challenge");
+        navigate(url);
+    };
+
     return (
         <Stack>
             <Grid container rowSpacing={4} columnSpacing={4}>
@@ -55,6 +68,7 @@ const HomepageContent = () => {
                         body="Challenge other users directly"
                         src={challengeUserThumbnail}
                         alt="challange user"
+                        onClick={() => cardClickHandler("/challenge-user")}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -63,6 +77,7 @@ const HomepageContent = () => {
                         body="Create challenges open to all or accept them"
                         src={challengeUserThumbnail}
                         alt="open challenge"
+                        onClick={() => cardClickHandler("/open-challenge")}
                     />
                 </Grid>
             </Grid>

@@ -12,7 +12,7 @@ import { Formik } from "formik";
 import { login } from "../../services/auth.service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
-import { setNotification } from "../../app/features/notification/notification-slice";
+import { useNotification } from "../../hooks/use-notification";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -30,30 +30,18 @@ const initialValues: ILoginFormValues = {
 
 export default function LoginForm() {
     const dispatch = useDispatch();
+    const notif = useNotification();
 
     const submitHandler = (values: ILoginFormValues) => {
         console.log(values);
 
         login(values).then(({ error, response }) => {
-            if (error)
-                return dispatch(
-                    setNotification({
-                        body: "Couldn't login",
-                        type: "error",
-                        open: true,
-                    })
-                );
+            if (error) return notif.error("Couldn't login");
 
             const { user } = response!;
             console.log(user);
             dispatch(setUser(user));
-            dispatch(
-                setNotification({
-                    body: "Successfully Logged in",
-                    type: "success",
-                    open: true,
-                })
-            );
+            notif.success("Logged in successfuly");
         });
     };
 
@@ -101,7 +89,6 @@ export default function LoginForm() {
                                 fullWidth
                                 id="username"
                                 label="Username"
-                                autoComplete="email"
                                 autoFocus
                                 {...formik.getFieldProps("username")}
                             />

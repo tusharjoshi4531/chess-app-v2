@@ -1,32 +1,18 @@
-import { AlertColor } from "@mui/material";
 import { createSlice } from "@reduxjs/toolkit";
-
-export interface INotificationState {
-    open: boolean;
-    body: string;
-    type: AlertColor | undefined;
-}
-
-const initialState: INotificationState = {
-    open: false,
-    body: "",
-    type: undefined,
-};
+import { initialState } from "./types";
+import {
+    setNotificationController,
+    clearNotificationController,
+} from "./action-controllers";
 
 export const notificationSlice = createSlice({
     name: "notification",
     initialState,
     reducers: {
-        setNotification: (state, action: { payload: INotificationState }) => {
-            if (state.type) return state;
-            state = action.payload;
-            return state;
-        },
-        hideNotification: (state) => ({ ...state, open: false }),
-        clearNotification: () => initialState,
+        setNotification: setNotificationController,
+        clearNotification: clearNotificationController,
     },
 });
 
-export const { setNotification, clearNotification, hideNotification } =
-    notificationSlice.actions;
+export const { setNotification, clearNotification } = notificationSlice.actions;
 export default notificationSlice.reducer;
