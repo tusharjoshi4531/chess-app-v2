@@ -5,6 +5,7 @@ config();
 
 import app from "./src/app";
 import { CORS_ORIGIN, PORT } from "./src/config/config";
+import connectionControllers from "./src/socketControllers/connection.controllers";
 
 const server = createServer(app);
 
@@ -21,4 +22,6 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     console.log(`${socket.id} connected`);
+
+    connectionControllers(io, socket);
 });

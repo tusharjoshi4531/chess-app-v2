@@ -3,6 +3,8 @@ export interface IUserState {
     userid: string;
     firstname: string;
     lastname: string;
+    refreshToken: string;
+    accessToken: string;
 }
 
 export const initialState: IUserState = {
@@ -10,4 +12,6 @@ export const initialState: IUserState = {
     userid: "",
     firstname: "",
     lastname: "",
+    accessToken: "",
+    refreshToken: "",
 };

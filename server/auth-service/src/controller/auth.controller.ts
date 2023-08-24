@@ -83,9 +83,12 @@ export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
     req,
     res
 ) => {
+    console.log(req.body);
     const { accessToken, refreshToken } = req.body;
 
     const refreshTokenIsValid = await isRefreshTokenValid(refreshToken);
+
+    console.log(refreshTokenIsValid);
 
     if (!refreshTokenIsValid)
         return res.status(401).json({ message: "Unauthorized" });

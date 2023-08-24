@@ -1,4 +1,3 @@
-import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,6 +12,10 @@ import * as yup from "yup";
 import { signup } from "../../services/auth.service";
 import { ISignupData } from "../../services/types";
 import _ from "lodash";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../app/features/user/user-slice";
+import { useNotification } from "../../hooks/use-notification";
+import { socket } from "../../socket";
 
 interface ISignupFormValues extends ISignupData {
     confirmPassword: string;
@@ -56,10 +59,20 @@ const validate = (values: ISignupFormValues) => {
 };
 
 export default function SignUpForm() {
+    const dispatch = useDispatch();
+    const notif = useNotification();
+
     const submitHandler = (values: ISignupFormValues) => {
         const signupData: ISignupData = _.omit(values, "confirmPassword");
 
-        signup(signupData);
+        signup(signupData).then(({ error, response }) => {
+            if (error) return notif.error("Couldn't sign up");
+
+            const { user, refreshToken, accessToken } = response!;
+            dispatch(setUser({ ...user, refreshToken, accessToken }));
+            notif.success("Signed up in successfuly");
+            socket.connect();
+        });
     };
 
     return (
