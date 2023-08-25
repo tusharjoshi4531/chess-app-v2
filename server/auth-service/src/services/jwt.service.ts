@@ -9,6 +9,7 @@ import {
 import { IUserDoc } from "../model/user.model";
 
 export const userDoc2Paylod = (user: IUserDoc): IAccessTokenPayload => ({
+    userid: user._id,
     username: user.username,
     firstname: user.firstname,
     lastname: user.lastname,

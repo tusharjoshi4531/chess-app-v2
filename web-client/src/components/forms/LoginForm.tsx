@@ -10,13 +10,10 @@ import * as yup from "yup";
 import { ILoginData } from "../../services/types";
 import { Formik } from "formik";
 import { login } from "../../services/auth.service";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
 import { useNotification } from "../../hooks/use-notification";
-import { IStore } from "../../app/store";
-import { IUserState } from "../../app/features/user/types";
-import { SOCKETIO_URL } from "../../config/config";
-import { useSocket } from "../../hooks/use-socket";
+
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
@@ -34,8 +31,6 @@ const initialValues: ILoginFormValues = {
 
 export default function LoginForm() {
     const dispatch = useDispatch();
-    const user = useSelector<IStore, IUserState>((state) => state.user);
-    const { connect } = useSocket();
     const notif = useNotification();
 
     const submitHandler = (values: ILoginFormValues) => {
@@ -48,7 +43,6 @@ export default function LoginForm() {
             console.log(user);
             dispatch(setUser({ ...user, refreshToken, accessToken }));
             notif.success("Logged in successfuly");
-            connect();
         });
     };
 

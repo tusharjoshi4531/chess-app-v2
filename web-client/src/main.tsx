@@ -10,14 +10,12 @@ import { Provider } from "react-redux";
 import Notification from "./components/layout/Notification.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <ThemeProvider theme={mainTheme}>
-                <Provider store={store}>
-                    <App />
-                    <Notification />
-                </Provider>
-            </ThemeProvider>
-        </BrowserRouter>
-    </React.StrictMode>
+    <BrowserRouter>
+        <ThemeProvider theme={mainTheme}>
+            <Provider store={store}>
+                <App />
+                <Notification />
+            </Provider>
+        </ThemeProvider>
+    </BrowserRouter>
 );

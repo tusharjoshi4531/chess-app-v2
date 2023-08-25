@@ -1,6 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { initialState } from "./types";
-import { clearUserController, setUserController } from "./action-controllers";
+import {
+    clearUserController,
+    setUserController,
+    updateTokenController,
+} from "./action-controllers";
 
 export const userSlice = createSlice({
     name: "user",
@@ -8,8 +12,9 @@ export const userSlice = createSlice({
     reducers: {
         setUser: setUserController,
         clearUser: clearUserController,
+        updateToken: updateTokenController,
     },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, updateToken } = userSlice.actions;
 export default userSlice.reducer;

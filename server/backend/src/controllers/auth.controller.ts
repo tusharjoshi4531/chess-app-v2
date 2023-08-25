@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { makeRequest } from "../../util/request";
+import { makeRequest } from "../util/request";
 import { AUTH_SERVER_URL } from "../config/config";
 import axios from "axios";
 import { Document } from "mongoose";

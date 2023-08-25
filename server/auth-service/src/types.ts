@@ -18,6 +18,7 @@ export interface IAuthorizeReqBody {
 
 // jwt
 export interface IAccessTokenPayload {
+    userid: string;
     username: string;
     firstname: string;
     lastname: string;

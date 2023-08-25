@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertColor, AlertProps } from "@mui/material/Alert";
-import { useDispatch, useSelector } from "react-redux";
-import {
-    INotificationState,
-    clearNotification,
-} from "../../app/features/notification/notification-slice";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
 import { NOTIF_LIFE } from "../../config/config";
+import {
+    IAlertState,
+    INotificationState,
+} from "../../app/features/notification/types";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -20,34 +20,60 @@ const Notification = () => {
     const notification = useSelector<IStore, INotificationState>(
         (state) => state.notification
     );
-    const [currentType, setCurrentType] = useState<AlertColor | undefined>(
-        undefined
-    );
-    const dispatch = useDispatch();
 
-    const alertCloseHandler = () => dispatch(clearNotification());
+    const [alertQueue, setAlertQueue] = useState<IAlertState[]>([]);
+
+    const removeNotification = useCallback(() => {
+        setAlertQueue((state) => {
+            if (state.length === 0) return [];
+            const newState = state.filter((_, index) => index > 0);
+            console.log({ state, newState });
+            return newState;
+        });
+    }, []);
+
+    const alertCloseHandler = () => {
+        removeNotification();
+        console.log("close");
+    };
     const snackbarCloseHandler = () => console.log("close");
 
     useEffect(() => {
         if (!notification.type) return;
-        setCurrentType(notification.type);
 
+        setAlertQueue((state) => {
+            const alert: IAlertState = {
+                body: notification.body,
+                type: notification.type,
+            };
+            return [...state, alert];
+        });
+    }, [notification.time]);
+
+    useEffect(() => {
+        if (alertQueue.length === 0) return;
         const timeout = setTimeout(() => {
-            dispatch(clearNotification());
+            removeNotification();
         }, NOTIF_LIFE);
 
         return () => clearTimeout(timeout);
-    }, [notification.type]);
+    }, [alertQueue, removeNotification]);
+
+    const isAlertOpen = alertQueue.length > 0;
+    const alertSeverity = isAlertOpen ? alertQueue[0].type : undefined;
+    const alertBody = isAlertOpen ? alertQueue[0].body : undefined;
+
+    console.log(alertQueue);
 
     return (
         <Snackbar
-            open={!!notification.type}
+            open={isAlertOpen}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             autoHideDuration={NOTIF_LIFE}
             onClose={snackbarCloseHandler}
-            >
-            <Alert onClose={alertCloseHandler} severity={currentType}>
-                {notification.body}
+        >
+            <Alert onClose={alertCloseHandler} severity={alertSeverity}>
+                {alertBody}
             </Alert>
         </Snackbar>
     );

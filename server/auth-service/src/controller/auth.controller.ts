@@ -94,6 +94,7 @@ export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
         return res.status(401).json({ message: "Unauthorized" });
 
     let user = await verifyAccessToken(accessToken);
+    console.log(user);
     if (user) {
         const newRefreshToken = createRefreshToken(user as IAccessTokenPayload);
         return res
@@ -102,6 +103,7 @@ export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
     }
 
     user = await verifyRefreshToken(refreshToken);
+    console.log(user);
     if (user) {
         const [accessToken, refreshToken] = generateTokens(
             user as IAccessTokenPayload
