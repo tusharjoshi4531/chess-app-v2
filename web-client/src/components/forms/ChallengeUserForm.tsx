@@ -20,18 +20,18 @@ enum ChoosePlayerColor {
     EITHER,
 }
 
-interface ITimeControl {
+export interface ITimeControl {
     minutes: number;
     seconds: number;
 }
 
-interface IChallengeUserValues {
+export interface IChallengeUserValues {
     username: string;
     time: ITimeControl;
     color: ChoosePlayerColor;
 }
 
-interface IChallengeUserPayload extends Omit<IChallengeUserValues, "username"> {
+export interface IChallengeUserPayload extends Omit<IChallengeUserValues, "username"> {
     from: string;
     to: string;
 }

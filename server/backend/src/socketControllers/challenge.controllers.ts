@@ -12,6 +12,8 @@ interface IChallengeUserPayload {
 }
 
 const challengeControllers = (io: Server, socket: Socket) => {
+    console.log({ auth: socket.handshake.auth });
+
     const challengUser = async (
         data: IChallengeUserPayload,
         callback: (success: boolean, body: string) => void
@@ -23,7 +25,7 @@ const challengeControllers = (io: Server, socket: Socket) => {
 
             if (socketId === "") return callback(false, "User not online");
 
-            io.to(socketId).emit("challenge-user/receive");
+            io.to(socketId).emit("challenge-user/receive", data);
 
             callback(true, "Sent request");
         } catch (error) {

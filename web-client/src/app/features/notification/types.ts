@@ -9,6 +9,7 @@ export interface INotification {
     title: string;
     body: string;
     from: string;
+    payload?: Record<string | number | symbol, unknown>;
 }
 
 export interface INotificationState {
