@@ -12,7 +12,7 @@ import { Formik } from "formik";
 import { login } from "../../services/auth.service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
-import { useNotification } from "../../hooks/use-notification";
+import { useAlert } from "../../hooks/use-alert";
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -31,18 +31,18 @@ const initialValues: ILoginFormValues = {
 
 export default function LoginForm() {
     const dispatch = useDispatch();
-    const notif = useNotification();
+    const alert = useAlert();
 
     const submitHandler = (values: ILoginFormValues) => {
         console.log(values);
 
         login(values).then(({ error, response }) => {
-            if (error) return notif.error("Couldn't login");
+            if (error) return alert.error("Couldn't login");
 
             const { user, refreshToken, accessToken } = response!;
             console.log(user);
             dispatch(setUser({ ...user, refreshToken, accessToken }));
-            notif.success("Logged in successfuly");
+            alert.success("Logged in successfuly");
         });
     };
 

@@ -4,10 +4,11 @@ import DrawerContent from "./DrawerContent";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Box from "@mui/material/Box";
-import { IUserState, clearUser } from "../../app/features/user/user-slice";
+import { clearUser } from "../../app/features/user/user-slice";
 import { IStore } from "../../app/store";
 import { logout } from "../../services/auth.service";
-import { setNotification } from "../../app/features/notification/notification-slice";
+import { IUserState } from "../../app/features/user/types";
+import { useAlert } from "../../hooks/use-alert";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -19,6 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const user = useSelector<IStore, IUserState>((state) => state.user);
     const dispatch = useDispatch();
+    const alert = useAlert();
 
     console.log(user);
 
@@ -27,13 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (buttonClick === "Home") targetUrl = "/";
         if (buttonClick === "Logout") {
             dispatch(clearUser());
-            dispatch(
-                setNotification({
-                    body: "Logged out",
-                    type: "info",
-                    open: true,
-                })
-            );
+            alert.info("Logged out");
             logout(user.userid);
             return;
         }

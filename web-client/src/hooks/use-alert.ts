@@ -1,12 +1,12 @@
 import { useDispatch } from "react-redux";
-import { setNotification } from "../app/features/notification/notification-slice";
+import { setAlert } from "../app/features/alert/alert-slice";
 
-export const useNotification = () => {
+export const useAlert = () => {
     const dispatch = useDispatch();
 
     const success = (body: string) => {
         dispatch(
-            setNotification({
+            setAlert({
                 type: "success",
                 body,
             })
@@ -15,7 +15,7 @@ export const useNotification = () => {
 
     const error = (body: string) => {
         dispatch(
-            setNotification({
+            setAlert({
                 type: "error",
                 body,
             })
@@ -24,7 +24,7 @@ export const useNotification = () => {
 
     const warning = (body: string) => {
         dispatch(
-            setNotification({
+            setAlert({
                 type: "warning",
                 body,
             })
@@ -33,7 +33,7 @@ export const useNotification = () => {
 
     const info = (body: string) => {
         dispatch(
-            setNotification({
+            setAlert({
                 type: "info",
                 body,
             })

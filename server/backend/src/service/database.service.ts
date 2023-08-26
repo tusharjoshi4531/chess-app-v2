@@ -18,3 +18,9 @@ export const addLiveUser = async (user: ILiveUserData) => {
 export const removeLiveUser = async (query: FilterQuery<ILiveUserData>) => {
     await liveUserModel.findOneAndDelete(query);
 };
+
+export const getUserSocketId = async (username: string) => {
+    const user = await liveUserModel.findOne({ username });
+    if (!user) return "";
+    return user.socketId;
+};

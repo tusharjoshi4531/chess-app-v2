@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNotification } from "./use-notification";
+import { useAlert } from "./use-alert";
 import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { IStore } from "../app/store";
@@ -7,7 +7,7 @@ import { IUserState } from "../app/features/user/types";
 import { updateToken } from "../app/features/user/user-slice";
 
 export const useSocket = () => {
-    const notif = useNotification();
+    const alert = useAlert();
     const dispatch = useDispatch();
     const { accessToken, refreshToken, userid } = useSelector<
         IStore,
@@ -16,7 +16,7 @@ export const useSocket = () => {
 
     useEffect(() => {
         const onConnect = () => {
-            notif.success("Connected to live server");
+            alert.success("Connected to live server");
             socket.emit(
                 "join-server",
                 { accessToken, refreshToken },
@@ -37,15 +37,15 @@ export const useSocket = () => {
         };
 
         const onDisconnect = () => {
-            notif.info("Disconnected from live server");
+            alert.info("Disconnected from live server");
         };
 
         const onError = () => {
-            notif.error("Error occured in live server");
+            alert.error("Error occured in live server");
         };
 
         const onConnectionFail = () => {
-            notif.error("Couldn't connect to live server");
+            alert.error("Couldn't connect to live server");
         };
 
         socket.on("connect", onConnect);
@@ -59,7 +59,7 @@ export const useSocket = () => {
             socket.off("error", onError);
             socket.off("connect_failed", onConnectionFail);
         };
-    }, [refreshToken, accessToken, notif]);
+    }, [refreshToken, accessToken, alert]);
 
     useEffect(() => {
         if (userid) socket.connect();

@@ -9,6 +9,10 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
+import { socket } from "../../socket";
+import { useAlert } from "../../hooks/use-alert";
+import { useSelector } from "react-redux";
+import { IStore } from "../../app/store";
 
 enum ChoosePlayerColor {
     WHITE,
@@ -25,6 +29,11 @@ interface IChallengeUserValues {
     username: string;
     time: ITimeControl;
     color: ChoosePlayerColor;
+}
+
+interface IChallengeUserPayload extends Omit<IChallengeUserValues, "username"> {
+    from: string;
+    to: string;
 }
 
 const timeControlSchema = yup.object<ITimeControl>({
@@ -48,8 +57,29 @@ const initialValues: IChallengeUserValues = {
 };
 
 const ChallengeUserForm = () => {
+    const alert = useAlert();
+    const username = useSelector<IStore, string>(
+        (state) => state.user.username
+    );
+
     const submitHandler = (values: IChallengeUserValues) => {
         console.log(values);
+
+        const payload: IChallengeUserPayload = {
+            from: username,
+            to: values.username,
+            time: values.time,
+            color: values.color,
+        };
+
+        socket.emit(
+            "challenge-user/send",
+            payload,
+            (success: boolean, body: string) => {
+                if (success) alert.success(body);
+                else alert.error(body);
+            }
+        );
     };
 
     return (

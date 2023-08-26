@@ -1,16 +1,20 @@
-import { AlertColor } from "@mui/material";
-
-export interface IAlertState {
-    body: string;
-    type: AlertColor | undefined;
+export enum NotificationType {
+    INFO,
+    REQUEST,
 }
 
-export interface INotificationState extends IAlertState {
-    time: number;
+export interface INotification {
+    id: number;
+    type: NotificationType;
+    title: string;
+    body: string;
+    from: string;
+}
+
+export interface INotificationState {
+    notifications: INotification[];
 }
 
 export const initialState: INotificationState = {
-    time: 0,
-    body: "",
-    type: undefined,
+    notifications: [],
 };

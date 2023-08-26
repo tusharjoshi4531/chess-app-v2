@@ -11,6 +11,7 @@ import {
 } from "./src/config/config";
 import connectionControllers from "./src/socketControllers/connection.controllers";
 import mongoose from "mongoose";
+import challengeControllers from "./src/socketControllers/challenge.controllers";
 
 const server = createServer(app);
 
@@ -36,4 +37,5 @@ io.on("connection", (socket) => {
     console.log(`${socket.id} connected`);
 
     connectionControllers(io, socket);
+    challengeControllers(io, socket);
 });

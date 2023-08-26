@@ -12,7 +12,7 @@ import challengeUserThumbnail from "../../assets/images/challenge_user_thumbnail
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
-import { useNotification } from "../../hooks/use-notification";
+import { useAlert } from "../../hooks/use-alert";
 
 interface ICustomCardButtonProps {
     title: string;
@@ -48,11 +48,11 @@ const CustomCardButton: React.FC<ICustomCardButtonProps> = ({
 
 const HomepageContent = () => {
     const navigate = useNavigate();
-    const notif = useNotification();
+    const alert = useAlert();
     const userid = useSelector<IStore, string>((state) => state.user.userid);
 
     const cardClickHandler = (url: string) => {
-        if (userid === "") return notif.info("Login to challenge");
+        if (userid === "") return alert.info("Login to challenge");
         navigate(url);
     };
 

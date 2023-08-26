@@ -10,6 +10,7 @@ import { IStore } from "./app/store";
 import HomepageContent from "./components/homepage/HomepageContent";
 import ChallengeUserForm from "./components/forms/ChallengeUserForm";
 import { useSocket } from "./hooks/use-socket";
+import NotificationsPage from "./pages/NotificationsPage";
 
 function App() {
     const userid = useSelector<IStore, string>((state) => state.user.userid);
@@ -31,11 +32,19 @@ function App() {
                     <>
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/signup" element={<SignUpForm />} />
+                        <Route
+                            path="/notification"
+                            element={<Navigate to="/" />}
+                        />
                     </>
                 ) : (
                     <>
                         <Route path="/login" element={<Navigate to="/" />} />
                         <Route path="/signup" element={<Navigate to="/" />} />
+                        <Route
+                            path="/notification"
+                            element={<NotificationsPage />}
+                        />
                     </>
                 )}
             </Routes>

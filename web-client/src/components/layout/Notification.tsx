@@ -4,10 +4,7 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
 import { NOTIF_LIFE } from "../../config/config";
-import {
-    IAlertState,
-    INotificationState,
-} from "../../app/features/notification/types";
+import { IAlertState } from "../../app/features/alert/types";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -17,8 +14,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 });
 
 const Notification = () => {
-    const notification = useSelector<IStore, INotificationState>(
-        (state) => state.notification
+    const notification = useSelector<IStore, IAlertState>(
+        (state) => state.alert
     );
 
     const [alertQueue, setAlertQueue] = useState<IAlertState[]>([]);
