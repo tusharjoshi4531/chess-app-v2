@@ -9,13 +9,14 @@ export interface INotification {
     title: string;
     body: string;
     from: string;
-    payload?: Record<string | number | symbol, unknown>;
+    actions: { label: string; fn: () => void }[];
+    expiresIn: number;
 }
 
 export interface INotificationState {
-    notifications: INotification[];
+    notifications: number;
 }
 
 export const initialState: INotificationState = {
-    notifications: [],
+    notifications: 0,
 };

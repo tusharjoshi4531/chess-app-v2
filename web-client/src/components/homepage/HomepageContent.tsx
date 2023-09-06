@@ -57,10 +57,10 @@ const HomepageContent = () => {
     };
 
     return (
-        <Stack>
+        <Stack mx={16} my={4}>
             <Grid container rowSpacing={4} columnSpacing={4}>
                 <Grid item xs={12}>
-                    <Typography variant="h2">Welcome</Typography>
+                    <Typography variant="h2" textAlign="center">Welcome</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <CustomCardButton

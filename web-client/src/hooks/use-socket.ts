@@ -12,10 +12,9 @@ import { NotificationType } from "../app/features/notification/types";
 export const useSocket = () => {
     const alert = useAlert();
     const dispatch = useDispatch();
-    const { accessToken, refreshToken, userid } = useSelector<
-        IStore,
-        IUserState
-    >((state) => state.user);
+    const { accessToken, refreshToken } = useSelector<IStore, IUserState>(
+        (state) => state.user
+    );
 
     const subscribeConnectionEvents = useCallback(() => {
         const onAuthenticated = (data: {
@@ -57,15 +56,28 @@ export const useSocket = () => {
     }, [refreshToken, accessToken, alert]);
 
     const subscribeChallengeReceiveEvents = useCallback(() => {
-        const onChallengeReceive = (data: IChallengeUserPayload) => {
+        const onChallengeReceive = (data: {
+            payload: IChallengeUserPayload;
+            expiresIn: number;
+        }) => {
             dispatch(
                 addNotification({
                     type: NotificationType.REQUEST,
                     title: "Challenge Request!!!",
-                    body: `${data.from} has challenged you`,
+                    body: `${data.payload.from} has challenged you`,
                     id: Date.now(),
-                    from: data.from,
-                    payload: { ...data },
+                    from: data.payload.from,
+                    expiresIn: data.expiresIn,
+                    actions: [
+                        {
+                            label: "accept",
+                            fn: () => alert.success("Accepted challenge"),
+                        },
+                        {
+                            label: "decline",
+                            fn: () => alert.info("Declined challenge "),
+                        },
+                    ],
                 })
             );
         };
@@ -82,16 +94,16 @@ export const useSocket = () => {
             connectionCleanup();
             challengeReceiveCleanup();
         };
-    }, [subscribeConnectionEvents]);
+    }, [subscribeConnectionEvents, subscribeChallengeReceiveEvents]);
 
-    useEffect(() => {
-        if (userid) {
-            socket.auth = {
-                refreshToken,
-                accessToken,
-            };
+    // useEffect(() => {
+    //     if (userid) {
+    //         socket.auth = {
+    //             refreshToken,
+    //             accessToken,
+    //         };
 
-            socket.connect();
-        } else socket.disconnect();
-    }, [userid, refreshToken, accessToken]);
+    //         socket.connect();
+    //     } else socket.disconnect();
+    // }, [userid, refreshToken, accessToken]);
 };

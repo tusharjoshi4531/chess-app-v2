@@ -13,6 +13,7 @@ import { socket } from "../../socket";
 import { useAlert } from "../../hooks/use-alert";
 import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
+import { challengeUser } from "../../services/challenge.service";
 
 enum ChoosePlayerColor {
     WHITE,
@@ -31,7 +32,8 @@ export interface IChallengeUserValues {
     color: ChoosePlayerColor;
 }
 
-export interface IChallengeUserPayload extends Omit<IChallengeUserValues, "username"> {
+export interface IChallengeUserPayload
+    extends Omit<IChallengeUserValues, "username"> {
     from: string;
     to: string;
 }
@@ -72,14 +74,11 @@ const ChallengeUserForm = () => {
             color: values.color,
         };
 
-        socket.emit(
-            "challenge-user/send",
-            payload,
-            (success: boolean, body: string) => {
-                if (success) alert.success(body);
-                else alert.error(body);
-            }
-        );
+        challengeUser(payload).then(({ error }) => {
+            if (error) return alert.error("Couldn't challenge user");
+
+            alert.success("Challenged user");
+        });
     };
 
     return (

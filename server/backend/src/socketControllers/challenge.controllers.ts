@@ -25,7 +25,10 @@ const challengeControllers = (io: Server, socket: Socket) => {
 
             if (socketId === "") return callback(false, "User not online");
 
-            io.to(socketId).emit("challenge-user/receive", data);
+            io.to(socketId).emit("challenge-user/receive", {
+                payload: data,
+                expiresIn: 300000,
+            }); // 5 mins epire time
 
             callback(true, "Sent request");
         } catch (error) {

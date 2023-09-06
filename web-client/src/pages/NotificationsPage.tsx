@@ -1,9 +1,15 @@
-import React from 'react'
+import { useContext } from "react";
+import { Stack } from "@mui/material";
+import NotificationContext from "../context/notification.context";
 
 const NotificationsPage = () => {
-  return (
-    <div>NotificationsPage</div>
-  )
-}
+    const { notifications } = useContext(NotificationContext);
 
-export default NotificationsPage
+    // const notificationComponents = notifications.map((notif) => (
+    //     <CustomNotification notificationData={notif} />
+    // ));
+
+    return <Stack height={"100%"}>{notifications.toString()}</Stack>;
+};
+
+export default NotificationsPage;

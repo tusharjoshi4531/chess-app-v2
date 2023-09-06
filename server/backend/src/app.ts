@@ -3,6 +3,9 @@ import cors from "cors";
 import authRouter from "./routes/auth";
 import { CORS_ORIGIN } from "./config/config";
 import roomRouter from "./routes/room";
+import notificationsRouter from "./routes/notifications";
+import { globalErrorHandler } from "./middleware/global.error";
+import { errorHandler } from "./error/handle.error";
 
 const app = express();
 
@@ -14,5 +17,14 @@ app.use(
 );
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/room", roomRouter);
+app.use("/api/v1/notifications", notificationsRouter);
+
+app.use(globalErrorHandler);
+
+process.on("uncaughtException", (err) => {
+    console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+    console.log(err.name, err.message);
+    process.exit(1);
+});
 
 export default app;
