@@ -6,14 +6,14 @@ import { IStore } from "../../app/store";
 import { NOTIF_LIFE } from "../../config/config";
 import { IAlertState } from "../../app/features/alert/types";
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+const AlertContent = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
     ref
 ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const Notification = () => {
+const Alert = () => {
     const notification = useSelector<IStore, IAlertState>(
         (state) => state.alert
     );
@@ -69,11 +69,11 @@ const Notification = () => {
             autoHideDuration={NOTIF_LIFE}
             onClose={snackbarCloseHandler}
         >
-            <Alert onClose={alertCloseHandler} severity={alertSeverity}>
+            <AlertContent onClose={alertCloseHandler} severity={alertSeverity}>
                 {alertBody}
-            </Alert>
+            </AlertContent>
         </Snackbar>
     );
 };
 
-export default Notification;
+export default Alert;

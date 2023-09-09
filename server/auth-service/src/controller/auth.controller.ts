@@ -6,6 +6,7 @@ import {
     IAccessTokenPayload,
 } from "../types";
 import {
+    checkUserExists,
     createUser,
     getUser,
     isRefreshTokenValid,
@@ -20,8 +21,8 @@ import {
     verifyRefreshToken,
 } from "../services/jwt.service";
 import mongoose, { Document } from "mongoose";
-import { IUserDoc } from "../model/user.model";
 import _ from "lodash";
+import { error401 } from "../error/app.error";
 
 const removePassword = (data: Document) => {
     const user = { ..._.omit(data.toObject(), ["password"]) };
@@ -31,7 +32,8 @@ const removePassword = (data: Document) => {
 
 export const signup: RequestHandler<{}, {}, ISignupReqBody, {}> = async (
     req,
-    res
+    res,
+    next
 ) => {
     try {
         const userDoc = await createUser(req.body);
@@ -43,13 +45,14 @@ export const signup: RequestHandler<{}, {}, ISignupReqBody, {}> = async (
 
         return res.status(200).json({ user, accessToken, refreshToken });
     } catch (error) {
-        return res.status(400).json({ message: "couldn't signup", error });
+        next(error);
     }
 };
 
 export const login: RequestHandler<{}, {}, ILoginReqBody, {}> = async (
     req,
-    res
+    res,
+    next
 ) => {
     try {
         const userDoc = await getUser(req.body);
@@ -61,11 +64,7 @@ export const login: RequestHandler<{}, {}, ILoginReqBody, {}> = async (
 
         return res.status(200).json({ user, accessToken, refreshToken });
     } catch (error) {
-        console.log(error);
-        return res.status(400).json({
-            message: "couldn't login",
-            error: error instanceof Error ? error.message : error,
-        });
+        next(error);
     }
 };
 
@@ -81,35 +80,58 @@ export const logout: RequestHandler<{}, {}, { userid: string }, {}> = (
 
 export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
     req,
-    res
+    res,
+    next
 ) => {
     console.log(req.body);
     const { accessToken, refreshToken } = req.body;
 
     const refreshTokenIsValid = await isRefreshTokenValid(refreshToken);
 
-    console.log(refreshTokenIsValid);
+    console.log({ refreshTokenIsValid });
 
     if (!refreshTokenIsValid)
-        return res.status(401).json({ message: "Unauthorized" });
+        return next(error401("Unauthorized: Refresh token not valid"));
 
     let user = await verifyAccessToken(accessToken);
     console.log(user);
     if (user) {
         const newRefreshToken = createRefreshToken(user as IAccessTokenPayload);
+        saveRefreshToken(
+            newRefreshToken,
+            new mongoose.Types.ObjectId((user as IAccessTokenPayload).userid)
+        );
         return res
             .status(200)
             .json({ user, accessToken, refreshToken: newRefreshToken });
     }
 
     user = await verifyRefreshToken(refreshToken);
-    console.log(user);
+    console.log({ user });
     if (user) {
         const [accessToken, refreshToken] = generateTokens(
             user as IAccessTokenPayload
         );
+        saveRefreshToken(
+            refreshToken,
+            new mongoose.Types.ObjectId((user as IAccessTokenPayload).userid)
+        );
         return res.status(200).json({ user, accessToken, refreshToken });
     }
 
-    return res.status(401).json({ message: "Unauthorized" });
+    next(error401("Unauthorized: Refresh token expired"));
+};
+
+export const exists: RequestHandler<
+    { username: string },
+    {},
+    {},
+    {}
+> = async (req, res, next) => {
+    try {
+        const isUserRegistered = await checkUserExists(req.params.username);
+        return res.status(200).json(isUserRegistered);
+    } catch (error) {
+        next(error);
+    }
 };

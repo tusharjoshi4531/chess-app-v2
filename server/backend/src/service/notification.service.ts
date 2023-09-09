@@ -20,13 +20,13 @@ interface INotificationChange {
 // Functions and methods
 export const createNotification = async (
     notification: INotification,
-    timestamp: number = Date.now() + 300000
+    life: number = 300000
 ) => {
     try {
         console.log(notification);
         const res = await notificationModel.create({
             ...notification,
-            timestamp,
+            timestamp: Date.now() + life,
         });
         return res;
     } catch (error) {
@@ -62,29 +62,54 @@ export const subscribeNotificationChange = (
     username: string,
     callback: (notificationChange: INotificationChange) => void
 ) => {
-    const pipeline = [{ $match: { "fullDocument.to": username } }];
+    const pipeline = [
+        {
+            $match: {
+                $or: [
+                    { "fullDocument.to": username },
+                    { operationType: "delete" },
+                ],
+            },
+        },
+    ];
 
     const changeStream = notificationModel
         .watch(pipeline)
         .on("change", (data) => {
-            switch (data.operationType) {
-                case "insert":
-                    callback({
-                        data: transformNotificationDoc(
-                            data.fullDocument as INotificationDoc
-                        ),
-                        type: NotificationChagneType.NOTIFICATION_INSERT,
-                    });
-                    break;
-                case "delete":
-                    callback({
-                        data: { id: data.documentKey._id },
-                        type: NotificationChagneType.NOTIFICATION_DELETE,
-                    });
-                    break;
-                default:
-                    break;
+            if (data.operationType === "insert") {
+                callback({
+                    data: transformNotificationDoc(
+                        data.fullDocument as INotificationDoc
+                    ),
+                    type: NotificationChagneType.NOTIFICATION_INSERT,
+                });
+            } else if (data.operationType === "delete") {
+                callback({
+                    data: { id: data.documentKey._id },
+                    type: NotificationChagneType.NOTIFICATION_DELETE,
+                });
             }
+
+            // switch (data.operationType) {
+            //     case "insert":
+            //         callback({
+            //             data: transformNotificationDoc(
+            //                 data.fullDocument as INotificationDoc
+            //             ),
+            //             type: NotificationChagneType.NOTIFICATION_INSERT,
+            //         });
+            //         break;
+            //     case "delete":
+            //         console.log("delete");
+            //         callback({
+            //             data: { id: data.documentKey._id },
+            //             type: NotificationChagneType.NOTIFICATION_DELETE,
+            //         });
+            //         break;
+            //     default:
+            //         console.log("default", data.operationType);
+            //         break;
+            // }
         });
     return changeStream;
 };

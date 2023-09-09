@@ -53,6 +53,6 @@ export const verifyAccessToken = async (token: string) => {
 };
 
 export const verifyRefreshToken = async (token: string) => {
-    const res = await verifyToken(token, REFRESH_TOKEN_LIFE);
+    const res = await verifyToken(token, REFRESH_TOKEN_SECRET);
     return res;
 };

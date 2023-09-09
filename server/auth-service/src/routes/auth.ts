@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { authorize, login, logout, signup } from "../controller/auth.controller";
+import {
+    authorize,
+    exists,
+    login,
+    logout,
+    signup,
+} from "../controller/auth.controller";
 import {
     validateAuthorize,
     validateLogin,
@@ -13,5 +19,6 @@ authRouter.post("/signup", validateSignup, signup);
 authRouter.post("/login", validateLogin, login);
 authRouter.post("/logout", validateLogout, logout);
 authRouter.post("/authorize", validateAuthorize, authorize);
+authRouter.get("/exists/:username", exists);
 
 export default authRouter;

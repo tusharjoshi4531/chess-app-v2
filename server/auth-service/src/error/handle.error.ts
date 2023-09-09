@@ -6,10 +6,6 @@ class ErrorHandler {
         console.error(error);
     }
 
-    public isOk(error: AppError) {
-        return error.statusCode.toString().startsWith("2");
-    }
-
     public isTrusedError(error: Error) {
         if (error instanceof AppError) return error.isOperational;
         return false;

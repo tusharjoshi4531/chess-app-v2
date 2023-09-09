@@ -57,7 +57,7 @@ const HomepageContent = () => {
     };
 
     return (
-        <Stack mx={16} my={4}>
+        <Stack mx={{sm: 4, md: 16}} my={4}>
             <Grid container rowSpacing={4} columnSpacing={4}>
                 <Grid item xs={12}>
                     <Typography variant="h2" textAlign="center">Welcome</Typography>

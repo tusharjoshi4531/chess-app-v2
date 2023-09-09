@@ -46,8 +46,4 @@ const notificationModel = model<INotificationDoc>(
     notificationSchema
 );
 
-notificationModel.watch().on("change", (data) => {
-    console.log(data);
-});
-
 export default notificationModel;

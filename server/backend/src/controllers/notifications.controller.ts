@@ -6,6 +6,7 @@ import {
     getNotifications,
     subscribeNotificationChange,
 } from "../service/notification.service";
+import { success201 } from "../error/app.error";
 
 export const subscribe: RequestHandler<
     { username: string },
@@ -27,6 +28,7 @@ export const subscribe: RequestHandler<
     const changeStreem = subscribeNotificationChange(
         req.params.username,
         (notification) => {
+            console.log(notification);
             const changeMessage = {
                 type: notification.type,
                 data: notification.data,
@@ -59,8 +61,14 @@ export const addNotification: RequestHandler<
     {}
 > = async (req, res, next) => {
     try {
-        const notif = await createNotification(req.body);
-        return res.status(201).json(notif);
+        await createNotification(req.body, 5000);
+        // return res
+        //     .status(201)
+        //     .json({
+        //         accessToken: req.accessToken,
+        //         refreshToken: req.refreshToken,
+        //     });
+        next(success201());
     } catch (error) {
         next(error);
     }

@@ -9,16 +9,16 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { socket } from "../../socket";
 import { useAlert } from "../../hooks/use-alert";
 import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
-import { challengeUser } from "../../services/challenge.service";
+import { IUserState } from "../../app/features/user/types";
+import { useServiceApi } from "../../hooks/use-service-api";
 
-enum ChoosePlayerColor {
-    WHITE,
-    BLACK,
-    EITHER,
+export enum ChoosePlayerColor {
+    WHITE = "WHITE",
+    BLACK = "BLACK",
+    EITHER = "EITHER",
 }
 
 export interface ITimeControl {
@@ -46,7 +46,7 @@ const timeControlSchema = yup.object<ITimeControl>({
 const validationSchema = yup.object<IChallengeUserValues>({
     username: yup.string().required("Required"),
     time: timeControlSchema,
-    color: yup.number().required("Required"),
+    color: yup.string().required("Required"),
 });
 
 const initialValues: IChallengeUserValues = {
@@ -60,9 +60,9 @@ const initialValues: IChallengeUserValues = {
 
 const ChallengeUserForm = () => {
     const alert = useAlert();
-    const username = useSelector<IStore, string>(
-        (state) => state.user.username
-    );
+    const { username } = useSelector<IStore, IUserState>((state) => state.user);
+
+    const { challengeUser } = useServiceApi();
 
     const submitHandler = (values: IChallengeUserValues) => {
         console.log(values);

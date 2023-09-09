@@ -31,6 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             dispatch(clearUser());
             alert.info("Logged out");
             logout(user.userid);
+            navigate("/");
             return;
         }
         if (buttonClick === "Profile") return;

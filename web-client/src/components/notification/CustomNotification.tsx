@@ -1,41 +1,35 @@
-import { Alert, Button, Stack } from "@mui/material";
-import { INotification } from "../../app/features/notification/types";
-import { useDispatch } from "react-redux";
-import { removeNotification } from "../../app/features/notification/notification-slice";
+import { Alert, AlertColor, Button, Stack } from "@mui/material";
 
-interface ICustonNotificationProps extends R {
-    notificationData: INotification;
+interface ICustonNotificationProps {
+    title: string;
+    body: string;
+    severity?: AlertColor;
+    onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
 const CustomNotification: React.FC<ICustonNotificationProps> = ({
-    notificationData,
+    title,
+    body,
+    onSuccess,
+    onCancel,
+    severity = "info",
 }) => {
-    const { actions, id, title, body } = notificationData;
-    const dispatch = useDispatch();
-
-    const actionClickHandler = (cb: () => void) => {
-        cb();
-        dispatch(removeNotification(id));
-    };
-
     const actionComponents = (
         <Stack spacing={1} direction="column">
-            {actions.map(({ label, fn }, index) => (
-                <Button
-                    id={index.toString()}
-                    onClick={() => {
-                        actionClickHandler(fn);
-                    }}
-                >
-                    {label}
+            {onSuccess && (
+                <Button variant="contained" onClick={onSuccess}>
+                    Yes
                 </Button>
-            ))}
+            )}
+            <Button variant="contained" onClick={onCancel}>
+                No
+            </Button>
         </Stack>
     );
-    
 
     return (
-        <Alert action={actionComponents} title={title} severity="info">
+        <Alert action={actionComponents} title={title} severity={severity}>
             {body}
         </Alert>
     );
