@@ -1,4 +1,11 @@
-import { Alert, AlertColor, Button, Stack } from "@mui/material";
+import {
+    Alert,
+    AlertTitle,
+    AlertColor,
+    Button,
+    Stack,
+    Typography,
+} from "@mui/material";
 
 interface ICustonNotificationProps {
     title: string;
@@ -16,20 +23,33 @@ const CustomNotification: React.FC<ICustonNotificationProps> = ({
     severity = "info",
 }) => {
     const actionComponents = (
-        <Stack spacing={1} direction="column">
+        <Stack spacing={1} direction="row" marginY="auto">
             {onSuccess && (
-                <Button variant="contained" onClick={onSuccess}>
+                <Button
+                    variant="contained"
+                    onClick={onSuccess}
+                    color="secondary"
+                >
                     Yes
                 </Button>
             )}
-            <Button variant="contained" onClick={onCancel}>
+            <Button variant="contained" onClick={onCancel} color="secondary">
                 No
             </Button>
         </Stack>
     );
 
     return (
-        <Alert action={actionComponents} title={title} severity={severity}>
+        <Alert
+            action={actionComponents}
+            severity={severity}
+            variant="filled"
+            elevation={4}
+        >
+            <AlertTitle>
+                <Typography fontWeight="bold">{title}</Typography>
+            </AlertTitle>
+
             {body}
         </Alert>
     );

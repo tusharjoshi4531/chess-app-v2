@@ -29,7 +29,7 @@ export const authorize: AuthorizedRequestHandler<
     const { refreshToken } = req.body;
     const accessToken = req.headers.authorization?.split(" ")[1];
 
-    console.log({ body: req.body });
+    console.log({ accessToken, refreshToken });
 
     if (!accessToken || !refreshToken)
         return error401(
@@ -42,15 +42,12 @@ export const authorize: AuthorizedRequestHandler<
         "",
         (url) => axios.post(url, { accessToken, refreshToken })
     );
-    console.log({ error, response });
 
     if (error) {
         req.accessToken = accessToken;
         req.refreshToken = refreshToken;
         return next(error401("Unauthorized"));
     }
-
-    console.log(response);
 
     req.refreshToken = response.refreshToken;
     req.accessToken = response.accessToken;

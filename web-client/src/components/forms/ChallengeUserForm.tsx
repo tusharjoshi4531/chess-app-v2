@@ -13,7 +13,8 @@ import { useAlert } from "../../hooks/use-alert";
 import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
 import { IUserState } from "../../app/features/user/types";
-import { useServiceApi } from "../../hooks/use-service-api";
+import { useAuthorizeRequest } from "../../hooks/use-authorize-request";
+import { challengeUser } from "../../services/challenge.service";
 
 export enum ChoosePlayerColor {
     WHITE = "WHITE",
@@ -61,8 +62,7 @@ const initialValues: IChallengeUserValues = {
 const ChallengeUserForm = () => {
     const alert = useAlert();
     const { username } = useSelector<IStore, IUserState>((state) => state.user);
-
-    const { challengeUser } = useServiceApi();
+    const { authRequest } = useAuthorizeRequest();
 
     const submitHandler = (values: IChallengeUserValues) => {
         console.log(values);
@@ -74,9 +74,8 @@ const ChallengeUserForm = () => {
             color: values.color,
         };
 
-        challengeUser(payload).then(({ error }) => {
+        authRequest(challengeUser.bind(this, payload)).then(({ error }) => {
             if (error) return alert.error("Couldn't challenge user");
-
             alert.success("Challenged user");
         });
     };

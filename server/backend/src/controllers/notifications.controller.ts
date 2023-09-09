@@ -3,10 +3,11 @@ import { INotification } from "../model/notification.model";
 import {
     NotificationChagneType,
     createNotification,
+    deleteNotification,
     getNotifications,
     subscribeNotificationChange,
 } from "../service/notification.service";
-import { success201 } from "../error/app.error";
+import { success200, success201 } from "../error/app.error";
 
 export const subscribe: RequestHandler<
     { username: string },
@@ -45,13 +46,6 @@ export const subscribe: RequestHandler<
     req.on("close", () => {
         changeStreem.close();
     });
-
-    // setInterval(() => {
-    //     res.write(`id: ${req.body.ssid}\n`);
-    //     res.write(
-    //         `data: ${JSON.stringify({ message: "Hello from server" })}\n\n`
-    //     );
-    // }, 3000);
 };
 
 export const addNotification: RequestHandler<
@@ -62,14 +56,22 @@ export const addNotification: RequestHandler<
 > = async (req, res, next) => {
     try {
         await createNotification(req.body, 5000);
-        // return res
-        //     .status(201)
-        //     .json({
-        //         accessToken: req.accessToken,
-        //         refreshToken: req.refreshToken,
-        //     });
         next(success201());
     } catch (error) {
         next(error);
     }
 };
+
+export const removeNotifiation: RequestHandler<
+    { notificationId: string },
+    {},
+    {},
+    {}
+> = async (req, res, next) => {
+    try {
+        await deleteNotification(req.params.notificationId);
+        next(success200());
+    } catch (error) {
+        next(error);
+    }
+}

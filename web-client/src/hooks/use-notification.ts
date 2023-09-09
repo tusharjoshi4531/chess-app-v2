@@ -1,44 +1,19 @@
-import { useRef, useEffect, useReducer } from "react";
+import { useRef, useEffect, useReducer, useCallback } from "react";
 import { SERVER_URL } from "../config/config";
 import { useSelector } from "react-redux";
 import { IStore } from "../app/store";
-
-export enum NotificationType {
-    CHALLENGE = "CHALLENGE",
-}
-
-export enum NotificationChagneType {
-    INITIAL_NOTIFICATIONS = "INITIAL_NOTIFICATIONS",
-    NOTIFICATION_INSERT = "NOTIFICATION_INSERT",
-    NOTIFICATION_DELETE = "NOTIFICATION_DELETE",
-}
-
-export interface IChallengePayload {
-    challengeId: string;
-}
-
-export interface INotification {
-    id: string;
-    to: string;
-    type: NotificationType;
-    title: string;
-    body: string;
-    from: string;
-    payload: IChallengePayload;
-}
+import { useAlert } from "./use-alert";
+import {
+    INotification,
+    INotificationState,
+    NotificationChagneType,
+    initialState,
+} from "../context/types";
 
 interface INotificationChange {
     data: INotification | INotification[] | { id: string };
     type: NotificationChagneType;
 }
-
-export interface INotificationState {
-    notifications: INotification[];
-}
-
-export const initialState: INotificationState = {
-    notifications: [],
-};
 
 const POLL_INTERVAL = 3000;
 
@@ -49,32 +24,36 @@ const notificationReducer = (
     switch (action.type) {
         case "SET_NOTIFICATIONS":
             return {
-                ...state,
                 notifications: action.payload as INotification[],
+                count: (action.payload as INotification[]).length,
             };
         case "ADD_NOTIFICATION":
             return {
-                ...state,
                 notifications: [
                     ...state.notifications,
                     action.payload as INotification,
                 ],
+                count: state.count + 1,
             };
         case "ADD_MANY_NOTIFICATIONS":
             return {
-                ...state,
                 notifications: [
                     ...state.notifications,
                     ...(action.payload as INotification[]),
                 ],
+                count: state.count + (action.payload as INotification[]).length,
             };
-        case "REMOVE_NOTIFICATION":
+        case "REMOVE_NOTIFICATION": {
+            const newNotifications = state.notifications.filter(
+                (notif) => notif.id !== action.payload
+            );
+
             return {
                 ...state,
-                notifications: state.notifications.filter(
-                    (notif) => notif.id !== action.payload
-                ),
+                notifications: newNotifications,
+                count: newNotifications.length,
             };
+        }
         default:
             return state;
     }
@@ -85,31 +64,36 @@ export const useNotification = () => {
     const username = useSelector<IStore, string>(
         (state) => state.user.username
     );
+    const alert = useAlert();
 
     const [state, dispatch] = useReducer(notificationReducer, {
         ...initialState,
     });
 
-    const addNotification = (notification: INotification) => {
-        dispatch({
-            type: "ADD_NOTIFICATION",
-            payload: notification,
-        });
-    };
+    const addNotification = useCallback(
+        (notification: INotification) => {
+            alert.info("You have received a notification");
+            dispatch({
+                type: "ADD_NOTIFICATION",
+                payload: notification,
+            });
+        },
+        [alert.info]
+    );
 
-    const setNotifications = (notifications: INotification[]) => {
+    const setNotifications = useCallback((notifications: INotification[]) => {
         dispatch({
             type: "SET_NOTIFICATIONS",
             payload: notifications,
         });
-    };
+    }, []);
 
-    const removeNotification = (id: string) => {
+    const removeNotification = useCallback((id: string) => {
         dispatch({
             type: "REMOVE_NOTIFICATION",
             payload: id,
         });
-    };
+    }, []);
 
     useEffect(() => {
         if (username === "") return;
@@ -152,7 +136,7 @@ export const useNotification = () => {
         const interval = setInterval(() => {
             if (source.current?.readyState === EventSource.CLOSED) {
                 source.current?.close();
-                source.current = new EventSource(sourceUrl);
+                source.current = null;
             }
         }, POLL_INTERVAL);
 
@@ -160,7 +144,13 @@ export const useNotification = () => {
             source.current?.close();
             clearInterval(interval);
         };
-    }, [username, source]);
+    }, [
+        username,
+        source,
+        addNotification,
+        setNotifications,
+        removeNotification,
+    ]);
 
     return { state };
 };

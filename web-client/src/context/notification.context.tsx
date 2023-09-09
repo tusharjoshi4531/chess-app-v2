@@ -1,9 +1,11 @@
 import { createContext } from "react";
-import { INotificationState, useNotification } from "../hooks/use-notification";
+import { INotificationState } from "./types";
+import { useNotification } from "../hooks/use-notification";
 
 export interface INotificationContext extends INotificationState {}
 
 const notificationContex = createContext<INotificationContext>({
+    count: 0,
     notifications: [],
 });
 
@@ -17,6 +19,7 @@ export const NotificationProvider: React.FC<IProviderProps> = ({
     const { state } = useNotification();
 
     const value: INotificationContext = {
+        count: state.count,
         notifications: state.notifications,
     };
 

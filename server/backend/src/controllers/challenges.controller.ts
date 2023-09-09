@@ -2,7 +2,12 @@ import { RequestHandler } from "express";
 import { success201 } from "../error/app.error";
 import { IChallenge } from "../model/challenge.model";
 import { INotification, NotificationType } from "../model/notification.model";
-import { createNotification } from "../service/notification.service";
+import {
+    createNotification,
+    deleteNotification,
+} from "../service/notification.service";
+import { createChallenge, deleteChallenge } from "../service/challenge.service";
+import _ from "lodash";
 
 export const addChallenge: RequestHandler = async (req, res, next) => {
     try {
@@ -27,6 +32,10 @@ export const challengeUser: RequestHandler<
         const { from } = req.body;
         const { targetUsername: to } = req.params;
 
+        const challengeData: IChallenge = _.omit(req.body, ["from"]);
+
+        const createdChallenge = await createChallenge(challengeData);
+
         const challengeNotif: INotification = {
             from,
             to,
@@ -34,12 +43,26 @@ export const challengeUser: RequestHandler<
             title: "New challenge",
             body: `${from} has challenged you to a game of chess`,
             payload: {
-                challengeId: "?",
+                challengeId: createdChallenge._id.toString(),
             },
         };
 
-        await createNotification(challengeNotif, 5000);
+        await createNotification(challengeNotif);
 
+        next(success201());
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const removeChallenge: RequestHandler<
+    { challengeId: string },
+    {},
+    {},
+    {}
+> = async (req, res, next) => {
+    try {
+        deleteChallenge(req.params.challengeId);
         next(success201());
     } catch (error) {
         next(error);

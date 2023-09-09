@@ -35,6 +35,15 @@ export const createNotification = async (
     }
 };
 
+export const deleteNotification = async (notificationId: string) => {
+    try {
+        const res = await notificationModel.findByIdAndDelete(notificationId);
+        return res;
+    } catch (error) {
+        throw error500("Error deleting notification");
+    }
+};
+
 const transformNotificationDoc = (
     doc: INotificationDoc
 ): ISavedNotification => ({
@@ -89,27 +98,6 @@ export const subscribeNotificationChange = (
                     type: NotificationChagneType.NOTIFICATION_DELETE,
                 });
             }
-
-            // switch (data.operationType) {
-            //     case "insert":
-            //         callback({
-            //             data: transformNotificationDoc(
-            //                 data.fullDocument as INotificationDoc
-            //             ),
-            //             type: NotificationChagneType.NOTIFICATION_INSERT,
-            //         });
-            //         break;
-            //     case "delete":
-            //         console.log("delete");
-            //         callback({
-            //             data: { id: data.documentKey._id },
-            //             type: NotificationChagneType.NOTIFICATION_DELETE,
-            //         });
-            //         break;
-            //     default:
-            //         console.log("default", data.operationType);
-            //         break;
-            // }
         });
     return changeStream;
 };
