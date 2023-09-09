@@ -6,7 +6,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Divider from "@mui/material/Divider";
 import { Badge, Typography } from "@mui/material";
 import { useContext } from "react";
-import notificationContex from "../../context/notification.context";
+import globalStateContext from "../../context/globalstate.context";
 
 type DrawerButton = string;
 
@@ -48,7 +48,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
     buttonGroups,
     onClick,
 }) => {
-    const {count} = useContext(notificationContex);
+    const { count } = useContext(globalStateContext).notificationState;
 
     const components = buttonGroups.map((group, index) => (
         <ButtonGroupList buttonGroup={group} key={index} onClick={onClick} />
@@ -72,7 +72,12 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
                     </ListItem>
                     <ListItem>
                         <ListItemButton>
-                            <Badge badgeContent={count} color="secondary" overlap="rectangular" variant="standard">
+                            <Badge
+                                badgeContent={count}
+                                color="secondary"
+                                overlap="rectangular"
+                                variant="standard"
+                            >
                                 <ListItemText
                                     primary="Notification"
                                     onClick={onClick.bind(this, "Notification")}

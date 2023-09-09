@@ -1,21 +1,20 @@
 import { RequestHandler } from "express";
-import { success201 } from "../error/app.error";
+import { error400, success201 } from "../error/app.error";
 import { IChallenge } from "../model/challenge.model";
 import { INotification, NotificationType } from "../model/notification.model";
+import { createNotification } from "../service/notification.service";
 import {
-    createNotification,
-    deleteNotification,
-} from "../service/notification.service";
-import { createChallenge, deleteChallenge } from "../service/challenge.service";
+    createChallenge,
+    deleteChallenge,
+    findChallenge,
+} from "../service/challenge.service";
 import _ from "lodash";
+import { IRoom } from "../model/room.model";
+import { createRoom, transformRoom } from "../service/room.service";
 
 export const addChallenge: RequestHandler = async (req, res, next) => {
     try {
         console.log(req.body);
-        // res.status(201).json({
-        //     accessToken: req.accessToken,
-        //     refreshToken: req.refreshToken,
-        // });
         next(success201());
     } catch (error) {
         next(error);
@@ -34,7 +33,10 @@ export const challengeUser: RequestHandler<
 
         const challengeData: IChallenge = _.omit(req.body, ["from"]);
 
-        const createdChallenge = await createChallenge(challengeData);
+        const createdChallenge = await createChallenge(
+            challengeData,
+            5 * 60 * 1000
+        );
 
         const challengeNotif: INotification = {
             from,
@@ -47,7 +49,7 @@ export const challengeUser: RequestHandler<
             },
         };
 
-        await createNotification(challengeNotif);
+        await createNotification(challengeNotif, 5 * 60 * 1000);
 
         next(success201());
     } catch (error) {
@@ -64,6 +66,47 @@ export const removeChallenge: RequestHandler<
     try {
         deleteChallenge(req.params.challengeId);
         next(success201());
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const acceptChallenge: RequestHandler<
+    { challengeId: string },
+    {},
+    { username: string },
+    {}
+> = async (req, res, next) => {
+    try {
+        const { challengeId } = req.params;
+        const { username } = req.body;
+
+        console.log({ challengeId, username });
+
+        const challenge = await findChallenge(challengeId);
+
+        const CAN_ACCEPT: boolean =
+            challenge.white === "?" ||
+            challenge.black === "?" ||
+            challenge.white === username ||
+            challenge.black === username;
+
+        if (!CAN_ACCEPT)
+            return next(error400("You can't accept this challenge"));
+
+        const newRoom: IRoom = {
+            white: challenge.white === "?" ? username : challenge.white,
+            whiteConnected: false,
+            black: challenge.black === "?" ? username : challenge.black,
+            blackConnected: false,
+            boardHistory: [],
+            spectators: [],
+        };
+
+        const createdRoom = transformRoom(await createRoom(newRoom));
+        await deleteChallenge(challengeId);
+
+        next(success201(createdRoom));
     } catch (error) {
         next(error);
     }

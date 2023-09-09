@@ -7,7 +7,7 @@ import {
     INotification,
     INotificationState,
     NotificationChagneType,
-    initialState,
+    initialNotifState,
 } from "../context/types";
 
 interface INotificationChange {
@@ -67,7 +67,7 @@ export const useNotification = () => {
     const alert = useAlert();
 
     const [state, dispatch] = useReducer(notificationReducer, {
-        ...initialState,
+        ...initialNotifState,
     });
 
     const addNotification = useCallback(
@@ -95,8 +95,18 @@ export const useNotification = () => {
         });
     }, []);
 
+    const clearNotifications = useCallback(() => {
+        dispatch({
+            type: "SET_NOTIFICATIONS",
+            payload: [],
+        });
+    }, []);
+
     useEffect(() => {
-        if (username === "") return;
+        if (username === "") {
+            clearNotifications();
+            return;
+        }
 
         const sourceUrl = `${SERVER_URL}/notifications/subscribe/${username}`;
         source.current = new EventSource(sourceUrl);
@@ -112,13 +122,11 @@ export const useNotification = () => {
                     );
                     break;
                 case NotificationChagneType.NOTIFICATION_INSERT:
-                    console.log("ADD NOTIFICATION");
                     addNotification(
                         notificationsChangeData.data as INotification
                     );
                     break;
                 case NotificationChagneType.NOTIFICATION_DELETE:
-                    console.log("REMOVE NOTIFICATION");
                     removeNotification(
                         (notificationsChangeData.data as { id: string }).id
                     );

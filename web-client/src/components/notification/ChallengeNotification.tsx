@@ -1,8 +1,13 @@
+import { useSelector } from "react-redux";
 import { useAlert } from "../../hooks/use-alert";
 import { useAuthorizeRequest } from "../../hooks/use-authorize-request";
-import { removeChallenge } from "../../services/challenge.service";
+import {
+    acceptChallenge,
+    removeChallenge,
+} from "../../services/challenge.service";
 import { removeNotifiation } from "../../services/notification.service";
 import CustomNotification from "./CustomNotification";
+import { IStore } from "../../app/store";
 
 interface IChallengeNotificationProps {
     title: string;
@@ -19,15 +24,36 @@ const ChallengeNotification: React.FC<IChallengeNotificationProps> = ({
 }) => {
     const alert = useAlert();
     const { multiAuthRequest } = useAuthorizeRequest();
-    const acceptHandler = () => {
-        console.log({ challengeId });
+
+    const username = useSelector<IStore, string>(
+        (state) => state.user.username
+    );
+
+    const acceptHandler = async () => {
+        const results = await multiAuthRequest([
+            acceptChallenge.bind(this, challengeId, username),
+            removeNotifiation.bind(this, notificationId),
+        ]);
+
+        const { response, error: errorAccept } = results[0];
+        if (errorAccept) alert.error("couldn't accept challenge");
+
+        console.log(results); 
+
+        if (results.length > 1) {
+            const { error: errorNotif } = results[1];
+            if (errorNotif) alert.error("couldn't remove notification");
+        }
+
+        console.log(response);
     };
 
     const cancelHandler = async () => {
-        const { error } = await multiAuthRequest([
+        const results = await multiAuthRequest([
             removeChallenge.bind(this, challengeId),
             removeNotifiation.bind(this, notificationId),
         ]);
+        const { error } = results[1];
         if (error) {
             alert.error("couldn't remove challenge");
         }

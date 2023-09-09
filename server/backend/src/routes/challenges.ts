@@ -1,5 +1,6 @@
 import { RequestHandler, Router } from "express";
 import {
+    acceptChallenge,
     addChallenge,
     challengeUser,
     removeChallenge,
@@ -18,5 +19,6 @@ challengesRouter.post(
     challengeUser
 );
 challengesRouter.post("/remove/:challengeId", removeChallenge);
+challengesRouter.post("/accept/:challengeId", acceptChallenge);
 
 export default challengesRouter;

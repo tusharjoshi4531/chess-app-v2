@@ -11,7 +11,9 @@ import HomepageContent from "./components/homepage/HomepageContent";
 import ChallengeUserForm from "./components/forms/ChallengeUserForm";
 import { useSocket } from "./hooks/use-socket";
 import NotificationsPage from "./pages/NotificationsPage";
-import { NotificationProvider } from "./context/notification.context";
+import { GlobalStateProvider } from "./context/globalstate.context";
+import GamePage from "./pages/GamePage";
+import RoomPageContent from "./components/rooms/RoomPageContent";
 
 function App() {
     const userid = useSelector<IStore, string>((state) => state.user.userid);
@@ -19,7 +21,7 @@ function App() {
     useSocket();
 
     return (
-        <NotificationProvider>
+        <GlobalStateProvider>
             <Layout>
                 <Routes>
                     <Route path="/" element={<HomePage />}>
@@ -55,9 +57,13 @@ function App() {
                             />
                         </>
                     )}
+                    <Route path="/game" element={<GamePage />}>
+                        <Route path="" element={<RoomPageContent />} />
+                        <Route path="room/:roomid" element={<div>Room</div>} />
+                    </Route>
                 </Routes>
             </Layout>
-        </NotificationProvider>
+        </GlobalStateProvider>
     );
 }
 

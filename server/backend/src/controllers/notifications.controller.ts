@@ -7,24 +7,25 @@ import {
     getNotifications,
     subscribeNotificationChange,
 } from "../service/notification.service";
-import { success200, success201 } from "../error/app.error";
+import { error400, success200, success201 } from "../error/app.error";
 
 export const subscribe: RequestHandler<
     { username: string },
     {},
     { ssid: string },
     {}
-> = async (req, res) => {
-    if (!req.params.username)
-        return res.status(400).json({ message: "User ID is required" });
+> = async (req, res, next) => {
+    if (!req.params.username) return next(error400("Username is required"));
 
-    console.log(req.params.username);
     const notifications = await getNotifications(req.params.username);
 
     const notificationMessage = {
         type: NotificationChagneType.INITIAL_NOTIFICATIONS,
         data: notifications,
     };
+
+    res.write(`id: ${req.body.ssid}\n`);
+    res.write(`data: ${JSON.stringify(notificationMessage)}\n\n`);
 
     const changeStreem = subscribeNotificationChange(
         req.params.username,
@@ -39,9 +40,6 @@ export const subscribe: RequestHandler<
             res.write(`data: ${JSON.stringify(changeMessage)}\n\n`);
         }
     );
-
-    res.write(`id: ${req.body.ssid}\n`);
-    res.write(`data: ${JSON.stringify(notificationMessage)}\n\n`);
 
     req.on("close", () => {
         changeStreem.close();
@@ -74,4 +72,4 @@ export const removeNotifiation: RequestHandler<
     } catch (error) {
         next(error);
     }
-}
+};

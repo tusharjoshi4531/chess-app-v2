@@ -1,12 +1,12 @@
 import { useContext } from "react";
 import { Stack } from "@mui/material";
-import NotificationContext from "../context/notification.context";
+import GlobalStateContext from "../context/globalstate.context";
 
 import ChallengeNotification from "../components/notification/ChallengeNotification";
 import { NotificationType } from "../context/types";
 
 const NotificationsPage = () => {
-    const { notifications } = useContext(NotificationContext);
+    const { notifications } = useContext(GlobalStateContext).notificationState;
 
     const notificationComponents = notifications.map((notif) => {
         switch (notif.type) {

@@ -76,17 +76,18 @@ export const useAuthorizeRequest = () => {
     ) => {
         let currentAccessToken = accessToken,
             currentRefreshToken = refreshToken;
-        let handleRes: {
+        const handleRes: {
             response: IAuthResponseData | undefined;
             error: IAuthResponseData | undefined;
-        } = { response: undefined, error: undefined };
+        }[] = [];
 
         for (const requestFn of requestFns) {
-            handleRes = await requestFn(
+            const res = await requestFn(
                 currentAccessToken,
                 currentRefreshToken
             );
-            const { error, response } = handleRes;
+            const { error, response } = res;
+            handleRes.push(res);
 
             const AUTH_INVALID =
                 error ||
@@ -102,7 +103,7 @@ export const useAuthorizeRequest = () => {
             if (response.refreshToken)
                 currentRefreshToken = response.refreshToken;
         }
-        handleRequestResponse(handleRes);
+        handleRequestResponse(handleRes[handleRes.length - 1]);
 
         return handleRes;
     };

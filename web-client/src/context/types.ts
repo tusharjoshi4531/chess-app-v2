@@ -28,7 +28,33 @@ export interface INotificationState {
     notifications: INotification[];
 }
 
-export const initialState: INotificationState = {
+export const initialNotifState: INotificationState = {
     count: 0,
     notifications: [],
+};
+
+// rooms
+export enum RoomsChangeType {
+    INITIAL_ROOMS = "INITIAL_ROOMS",
+    ROOM_INSERT = "ROOM_INSERT",
+    ROOM_DELETE = "ROOM_DELETE",
+}
+
+export interface IRoom {
+    id: string
+    white: string;
+    whiteConnected: boolean;
+    black: string;
+    blackConnected: boolean;
+    boardHistory: string[];
+}
+
+export interface IRoomState {
+    count: number;
+    rooms: IRoom[];
+}
+
+export const initialRoomState: IRoomState = {
+    count: 0,
+    rooms: [],
 };

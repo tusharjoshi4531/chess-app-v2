@@ -20,6 +20,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/room", roomRouter);
 app.use("/api/v1/notifications", notificationsRouter);
 app.use("/api/v1/challenges", challengesRouter);
+app.use("/api/v1/rooms", roomRouter);
 
 app.use(globalErrorHandler);
 

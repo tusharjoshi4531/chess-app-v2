@@ -61,3 +61,32 @@ export const removeChallenge = async (
 
     return res;
 };
+
+export const acceptChallenge = async (
+    challengeId: string,
+    username: string,
+    accessToken: string,
+    refreshToken: string
+) => {
+    console.log({ challengeId, username, accessToken, refreshToken });
+    const res = await makeRequest(
+        SERVER_URL,
+        `/challenges/accept/${challengeId}`,
+        "",
+        (url) =>
+            axios.post(
+                url,
+                {
+                    username,
+                    refreshToken,
+                },
+                {
+                    headers: {
+                        authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            )
+    );
+
+    return res;
+};
