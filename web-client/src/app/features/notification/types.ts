@@ -1,22 +1,33 @@
 export enum NotificationType {
-    INFO,
-    REQUEST,
+    CHALLENGE = "CHALLENGE",
+}
+
+export enum NotificationChagneType {
+    INITIAL_NOTIFICATIONS = "INITIAL_NOTIFICATIONS",
+    NOTIFICATION_INSERT = "NOTIFICATION_INSERT",
+    NOTIFICATION_DELETE = "NOTIFICATION_DELETE",
+}
+
+export interface IChallengePayload {
+    challengeId: string;
 }
 
 export interface INotification {
-    id: number;
+    id: string;
+    to: string;
     type: NotificationType;
     title: string;
     body: string;
     from: string;
-    actions: { label: string; fn: () => void }[];
-    expiresIn: number;
+    payload: IChallengePayload;
 }
 
 export interface INotificationState {
-    notifications: number;
+    count: number;
+    notifications: INotification[];
 }
 
 export const initialState: INotificationState = {
-    notifications: 0,
+    count: 0,
+    notifications: [],
 };

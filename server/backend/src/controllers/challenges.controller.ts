@@ -94,13 +94,20 @@ export const acceptChallenge: RequestHandler<
         if (!CAN_ACCEPT)
             return next(error400("You can't accept this challenge"));
 
+        const timeControlInMs =
+            challenge.time.minutes * 60 * 1000 + challenge.time.seconds * 1000;
+
         const newRoom: IRoom = {
             white: challenge.white === "?" ? username : challenge.white,
             whiteConnected: false,
+            whiteRemainigTime: timeControlInMs,
             black: challenge.black === "?" ? username : challenge.black,
             blackConnected: false,
+            blackRemainigTime: timeControlInMs,
             boardHistory: [],
             spectators: [],
+            chats: [],
+            lastMoveTime: Date.now(),
         };
 
         const createdRoom = transformRoom(await createRoom(newRoom));

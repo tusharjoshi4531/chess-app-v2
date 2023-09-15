@@ -3,6 +3,8 @@ import { initialState } from "./types";
 import {
     addNotificationController,
     removeNotificationController,
+    addManyNotificationsController,
+    setNotificationsController,
 } from "./action-cotrollers";
 
 export const notificationSlice = createSlice({
@@ -11,9 +13,16 @@ export const notificationSlice = createSlice({
     reducers: {
         addNotification: addNotificationController,
         removeNotification: removeNotificationController,
+        addManyNotifications: addManyNotificationsController,
+        setNotification: setNotificationsController,
     },
 });
 
-export const { addNotification, removeNotification } =
-    notificationSlice.actions;
+export const {
+    addNotification,
+    removeNotification,
+    addManyNotifications,
+    setNotification,
+} = notificationSlice.actions;
+
 export default notificationSlice.reducer;

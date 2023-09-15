@@ -13,7 +13,6 @@ import { login } from "../../services/auth.service";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
 import { useAlert } from "../../hooks/use-alert";
-import { useNotification } from "../../hooks/use-notification";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 

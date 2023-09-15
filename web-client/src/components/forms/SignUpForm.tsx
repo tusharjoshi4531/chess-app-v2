@@ -15,7 +15,6 @@ import _ from "lodash";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../app/features/user/user-slice";
 import { useAlert } from "../../hooks/use-alert";
-import { socket } from "../../socket";
 
 interface ISignupFormValues extends ISignupData {
     confirmPassword: string;
@@ -71,7 +70,6 @@ export default function SignUpForm() {
             const { user, refreshToken, accessToken } = response!;
             dispatch(setUser({ ...user, refreshToken, accessToken }));
             alert.success("Signed up in successfuly");
-            socket.connect();
         });
     };
 

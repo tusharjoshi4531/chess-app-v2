@@ -1,14 +1,18 @@
-import { useRef, useEffect, useReducer, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { SERVER_URL } from "../config/config";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { IStore } from "../app/store";
 import { useAlert } from "./use-alert";
 import {
     INotification,
-    INotificationState,
     NotificationChagneType,
-    initialNotifState,
-} from "../context/types";
+} from "../app/features/notification/types";
+
+import {
+    addNotification as addNotifToState,
+    removeNotification as removeNotifFromState,
+    setNotification as setNotifInState,
+} from "../app/features/notification/notification-slice";
 
 interface INotificationChange {
     data: INotification | INotification[] | { id: string };
@@ -17,90 +21,39 @@ interface INotificationChange {
 
 const POLL_INTERVAL = 3000;
 
-const notificationReducer = (
-    state: INotificationState,
-    action: { type: string; payload: INotification | INotification[] | string }
-) => {
-    switch (action.type) {
-        case "SET_NOTIFICATIONS":
-            return {
-                notifications: action.payload as INotification[],
-                count: (action.payload as INotification[]).length,
-            };
-        case "ADD_NOTIFICATION":
-            return {
-                notifications: [
-                    ...state.notifications,
-                    action.payload as INotification,
-                ],
-                count: state.count + 1,
-            };
-        case "ADD_MANY_NOTIFICATIONS":
-            return {
-                notifications: [
-                    ...state.notifications,
-                    ...(action.payload as INotification[]),
-                ],
-                count: state.count + (action.payload as INotification[]).length,
-            };
-        case "REMOVE_NOTIFICATION": {
-            const newNotifications = state.notifications.filter(
-                (notif) => notif.id !== action.payload
-            );
-
-            return {
-                ...state,
-                notifications: newNotifications,
-                count: newNotifications.length,
-            };
-        }
-        default:
-            return state;
-    }
-};
-
 export const useNotification = () => {
     const source = useRef<EventSource | null>(null);
     const username = useSelector<IStore, string>(
         (state) => state.user.username
     );
     const alert = useAlert();
-
-    const [state, dispatch] = useReducer(notificationReducer, {
-        ...initialNotifState,
-    });
+    const dispatch = useDispatch();
 
     const addNotification = useCallback(
         (notification: INotification) => {
             alert.info("You have received a notification");
-            dispatch({
-                type: "ADD_NOTIFICATION",
-                payload: notification,
-            });
+            dispatch(addNotifToState(notification));
         },
-        [alert.info]
+        [alert.info, dispatch]
     );
 
-    const setNotifications = useCallback((notifications: INotification[]) => {
-        dispatch({
-            type: "SET_NOTIFICATIONS",
-            payload: notifications,
-        });
-    }, []);
+    const setNotifications = useCallback(
+        (notifications: INotification[]) => {
+            dispatch(setNotifInState(notifications));
+        },
+        [dispatch]
+    );
 
-    const removeNotification = useCallback((id: string) => {
-        dispatch({
-            type: "REMOVE_NOTIFICATION",
-            payload: id,
-        });
-    }, []);
+    const removeNotification = useCallback(
+        (id: string) => {
+            dispatch(removeNotifFromState(id));
+        },
+        [dispatch]
+    );
 
     const clearNotifications = useCallback(() => {
-        dispatch({
-            type: "SET_NOTIFICATIONS",
-            payload: [],
-        });
-    }, []);
+        dispatch(setNotifInState([]));
+    }, [dispatch]);
 
     useEffect(() => {
         if (username === "") {
@@ -158,7 +111,6 @@ export const useNotification = () => {
         addNotification,
         setNotifications,
         removeNotification,
+        clearNotifications,
     ]);
-
-    return { state };
 };

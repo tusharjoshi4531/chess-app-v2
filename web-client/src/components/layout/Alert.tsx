@@ -6,12 +6,11 @@ import { IStore } from "../../app/store";
 import { NOTIF_LIFE } from "../../config/config";
 import { IAlertState } from "../../app/features/alert/types";
 
-const AlertContent = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+const AlertContent = React.forwardRef<HTMLDivElement, AlertProps>(
+    function Alert(props, ref) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    }
+);
 
 const Alert = () => {
     const notification = useSelector<IStore, IAlertState>(
@@ -24,16 +23,14 @@ const Alert = () => {
         setAlertQueue((state) => {
             if (state.length === 0) return [];
             const newState = state.filter((_, index) => index > 0);
-            console.log({ state, newState });
+
             return newState;
         });
     }, []);
 
     const alertCloseHandler = () => {
         removeNotification();
-        console.log("close");
     };
-    const snackbarCloseHandler = () => console.log("close");
 
     useEffect(() => {
         if (!notification.type) return;
@@ -60,14 +57,11 @@ const Alert = () => {
     const alertSeverity = isAlertOpen ? alertQueue[0].type : undefined;
     const alertBody = isAlertOpen ? alertQueue[0].body : undefined;
 
-    console.log(alertQueue);
-
     return (
         <Snackbar
             open={isAlertOpen}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             autoHideDuration={NOTIF_LIFE}
-            onClose={snackbarCloseHandler}
         >
             <AlertContent onClose={alertCloseHandler} severity={alertSeverity}>
                 {alertBody}

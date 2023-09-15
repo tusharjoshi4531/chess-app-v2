@@ -36,7 +36,10 @@ export const challengeValidator: RequestHandler<
         const error = error400("Invalid request body structure");
         return next(error);
     }
-    
+
+    if (targetUsername === from)
+        return next(error400("You can't challenge yourself"));
+
     const { error, response } = await makeRequest<boolean>(
         AUTH_SERVER_URL,
         `/exists/${targetUsername}`,

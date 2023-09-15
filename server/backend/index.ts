@@ -11,7 +11,7 @@ import {
 } from "./src/config/config";
 import connectionControllers from "./src/socketControllers/connection.controllers";
 import mongoose from "mongoose";
-import challengeControllers from "./src/socketControllers/challenge.controllers";
+import challengeControllers from "./src/socketControllers/room.controllers";
 import { authenticateUser } from "./src/socketMiddleware/authenticate.middleware";
 
 const server = createServer(app);
@@ -38,6 +38,9 @@ io.use(authenticateUser);
 
 io.on("connection", (socket) => {
     console.log(`${socket.id} connected`);
+    socket.on("disconnect", () => {
+        console.log(`${socket.id} disconnected`);
+    });
 
     connectionControllers(io, socket);
     challengeControllers(io, socket);

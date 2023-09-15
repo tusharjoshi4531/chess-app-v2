@@ -16,6 +16,7 @@ export const subscribe: RequestHandler<
     {}
 > = async (req, res, next) => {
     if (!req.params.username) return next(error400("Username is required"));
+    
 
     const notifications = await getNotifications(req.params.username);
 
@@ -30,7 +31,6 @@ export const subscribe: RequestHandler<
     const changeStreem = subscribeNotificationChange(
         req.params.username,
         (notification) => {
-            console.log(notification);
             const changeMessage = {
                 type: notification.type,
                 data: notification.data,

@@ -5,8 +5,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Divider from "@mui/material/Divider";
 import { Badge, Typography } from "@mui/material";
-import { useContext } from "react";
-import globalStateContext from "../../context/globalstate.context";
+import { useSelector } from "react-redux";
+import { IStore } from "../../app/store";
 
 type DrawerButton = string;
 
@@ -48,7 +48,9 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
     buttonGroups,
     onClick,
 }) => {
-    const { count } = useContext(globalStateContext).notificationState;
+    const count = useSelector<IStore, number>(
+        (state) => state.notification.count
+    );
 
     const components = buttonGroups.map((group, index) => (
         <ButtonGroupList buttonGroup={group} key={index} onClick={onClick} />

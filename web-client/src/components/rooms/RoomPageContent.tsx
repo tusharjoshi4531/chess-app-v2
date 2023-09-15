@@ -1,10 +1,28 @@
-import React, { useContext } from "react";
-import globalStateContext from "../../context/globalstate.context";
+
+import { useSelector } from "react-redux";
+import RoomCard from "./RoomCard";
+import { Grid } from "@mui/material";
+import { IStore } from "../../app/store";
+import { IRoom } from "../../app/features/rooms/types";
+
 
 const RoomPageContent = () => {
-    const { rooms } = useContext(globalStateContext).roomState;
-    console.log(rooms);
-    return <div>{rooms.toString()}</div>;
+
+    const rooms = useSelector<IStore, IRoom[]> (state => state.rooms.rooms);
+
+    const roomComponents = rooms.map((room) => {
+        return (
+            <Grid item md={6} sm={12} key={room.id}>
+                <RoomCard roomData={room} />
+            </Grid>
+        );
+    });
+
+    return (
+        <Grid container spacing={2} justifyContent="center">
+            {roomComponents}
+        </Grid>
+    );
 };
 
 export default RoomPageContent;

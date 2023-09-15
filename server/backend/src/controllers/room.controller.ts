@@ -37,6 +37,7 @@ export const subscribe: RequestHandler<
     });
 
     req.on("close", () => {
+        console.log("closing");
         changeStreem.close();
     });
 

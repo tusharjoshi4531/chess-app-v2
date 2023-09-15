@@ -1,12 +1,17 @@
-import { useContext } from "react";
 import { Stack } from "@mui/material";
-import GlobalStateContext from "../context/globalstate.context";
 
 import ChallengeNotification from "../components/notification/ChallengeNotification";
-import { NotificationType } from "../context/types";
+import { useSelector } from "react-redux";
+import { IStore } from "../app/store";
+import {
+    INotification,
+    NotificationType,
+} from "../app/features/notification/types";
 
 const NotificationsPage = () => {
-    const { notifications } = useContext(GlobalStateContext).notificationState;
+    const notifications = useSelector<IStore, INotification[]>(
+        (state) => state.notification.notifications
+    );
 
     const notificationComponents = notifications.map((notif) => {
         switch (notif.type) {

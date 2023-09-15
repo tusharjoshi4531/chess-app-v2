@@ -3,7 +3,7 @@ import { ExtendedError } from "socket.io/dist/namespace";
 import { makeRequest } from "../util/request";
 import { AUTH_SERVER_URL } from "../config/config";
 import axios from "axios";
-import { addLiveUser } from "../service/database.service";
+import { addLiveUser } from "../service/live-user.service";
 
 interface IAuthResult {
     user: {
