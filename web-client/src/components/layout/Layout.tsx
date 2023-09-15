@@ -14,8 +14,6 @@ interface LayoutProps {
     children: React.ReactNode;
 }
 
-const drawerButtonGroups = [["Home", "Game"], ["Social"]];
-
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const user = useSelector<IStore, IUserState>((state) => state.user);
@@ -46,7 +44,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Box>
                     <DrawerContent
                         username={user.username}
-                        buttonGroups={drawerButtonGroups}
                         onClick={onClick}
                     />
                 </Box>
