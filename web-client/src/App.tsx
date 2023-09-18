@@ -57,6 +57,7 @@ function App() {
                     <Route path="" element={<RoomPageContent />} />
                     <Route path="room/:roomid" element={<GameRoom />} />
                 </Route>
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Layout>
     );

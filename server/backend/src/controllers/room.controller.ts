@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { error400 } from "../error/app.error";
 import {
+    ISavedRoom,
     RoomsChangeType,
     getRooms,
     subscribeRoomChange,
@@ -25,8 +26,16 @@ export const subscribe: RequestHandler<
     res.write(`id: ${req.body.ssid}\n`);
     res.write(`data: ${JSON.stringify(roomMessage)}\n\n`);
 
-    const changeStreem = subscribeRoomChange(req.params.username, (room) => {
+    const cleanUp = subscribeRoomChange((room) => {
         console.log(room);
+        const irreleventChange =
+            (room.data as ISavedRoom).white !== req.params.username &&
+            (room.data as ISavedRoom).black !== req.params.username;
+
+        console.log({ irreleventChange });
+
+        if (irreleventChange) return;
+
         const changeMessage = {
             type: room.type,
             data: room.data,
@@ -37,8 +46,7 @@ export const subscribe: RequestHandler<
     });
 
     req.on("close", () => {
-        console.log("closing");
-        changeStreem.close();
+        cleanUp();
     });
 
     console.log(req.params.username);

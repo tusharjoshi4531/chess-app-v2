@@ -9,7 +9,7 @@ import {
     findChallenge,
 } from "../service/challenge.service";
 import _ from "lodash";
-import { IRoom } from "../model/room.model";
+import { IRoom, IRoomDoc } from "../model/room.model";
 import { createRoom, transformRoom } from "../service/room.service";
 
 export const addChallenge: RequestHandler = async (req, res, next) => {
@@ -100,6 +100,8 @@ export const acceptChallenge: RequestHandler<
         const newRoom: IRoom = {
             white: challenge.white === "?" ? username : challenge.white,
             whiteConnected: false,
+            finished: false,
+            turn: "w",
             whiteRemainigTime: timeControlInMs,
             black: challenge.black === "?" ? username : challenge.black,
             blackConnected: false,
@@ -108,6 +110,7 @@ export const acceptChallenge: RequestHandler<
             spectators: [],
             chats: [],
             lastMoveTime: Date.now(),
+            timerStarted: false,
         };
 
         const createdRoom = transformRoom(await createRoom(newRoom));

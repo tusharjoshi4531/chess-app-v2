@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 import { error500 } from "../error/app.error";
-import roomModel, { IRoom, IRoomDoc } from "../model/room.model";
+import roomModel, {
+    IChatDoc,
+    IChatMessage,
+    IRoom,
+    IRoomDoc,
+} from "../model/room.model";
+import { EventEmitter } from "stream";
 
 export enum RoomsChangeType {
     INITIAL_ROOMS = "INITIAL_ROOMS",
@@ -13,12 +19,26 @@ export interface ISavedRoom extends IRoom {
 }
 
 interface IRoomsChange {
-    data: ISavedRoom | { id: string };
+    data:
+        | ISavedRoom
+        | {
+              id: string;
+              black: string;
+              white: string;
+          };
     type: RoomsChangeType;
 }
 
+export const transformChat = (chat: IChatDoc): IChatMessage => ({
+    id: chat._id.toString(),
+    username: chat.username,
+    message: chat.message,
+});
+
 export const transformRoom = (doc: IRoomDoc): IRoom & { id: string } => ({
     id: doc._id.toString(),
+    finished: doc.finished,
+    turn: doc.turn,
     white: doc.white,
     whiteConnected: doc.whiteConnected,
     whiteRemainigTime: doc.whiteRemainigTime,
@@ -27,13 +47,41 @@ export const transformRoom = (doc: IRoomDoc): IRoom & { id: string } => ({
     blackRemainigTime: doc.blackRemainigTime,
     boardHistory: doc.boardHistory,
     spectators: doc.spectators,
-    chats: doc.chats,
+    chats: doc.chats.map((chat) => transformChat(chat)),
     lastMoveTime: doc.lastMoveTime,
+    timerStarted: doc.timerStarted,
 });
+
+class RoomsChangeEmitter extends EventEmitter {
+    constructor() {
+        super();
+    }
+
+    emitRoomsChange(roomsChange: IRoomsChange) {
+        this.emit("rooms/change", roomsChange);
+    }
+
+    onRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
+        this.on("rooms/change", callback);
+        console.log(this.eventNames());
+    }
+
+    offRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
+        this.off("rooms/change", callback);
+    }
+}
+
+const roomsChangeEmitter = new RoomsChangeEmitter();
 
 export const createRoom = async (room: IRoom) => {
     try {
         const roomDoc = await roomModel.create(room);
+
+        roomsChangeEmitter.emitRoomsChange({
+            data: transformRoom(roomDoc),
+            type: RoomsChangeType.ROOM_INSERT,
+        });
+
         return roomDoc;
     } catch (error) {
         throw error500("Couldn't create room");
@@ -43,7 +91,10 @@ export const createRoom = async (room: IRoom) => {
 export const getRooms = async (username: string) => {
     try {
         const rooms = await roomModel.find({
-            $or: [{ white: username }, { black: username }],
+            $and: [
+                { finished: false },
+                { $or: [{ white: username }, { black: username }] },
+            ],
         });
         return rooms.map(transformRoom);
     } catch (error) {
@@ -51,45 +102,26 @@ export const getRooms = async (username: string) => {
     }
 };
 
-export const subscribeRoomChange = (
-    username: string,
-    callback: (room: IRoomsChange) => void
-) => {
-    console.log("subscribing to room change");
-    const pipeline = [
-        {
-            $match: {
-                $or: [
-                    { "fullDocument.white": username },
-                    { "fullDocument.black": username },
-                    { operationType: "delete" },
-                ],
-            },
-        },
-    ];
-
-    const changeStream = roomModel.watch().on("change", (change) => {
-        console.log(change);
-        if (change.operationType === "insert") {
-            callback({
-                data: transformRoom(change.fullDocument as IRoomDoc),
-                type: RoomsChangeType.ROOM_INSERT,
-            });
-        } else if (change.operationType === "delete") {
-            callback({
-                data: { id: change.documentKey._id },
-                type: RoomsChangeType.ROOM_DELETE,
-            });
+const updateRemainingTime = (roomDoc: IRoomDoc) => {
+    const timeElapsed = Date.now() - roomDoc.lastMove;
+    if (roomDoc.timerStarted) {
+        if (roomDoc.turn === "w") {
+            roomDoc.whiteRemainigTime -= timeElapsed;
+            roomDoc.whiteRemainigTime = Math.max(roomDoc.whiteRemainigTime, 0);
+        } else {
+            roomDoc.blackRemainigTime -= timeElapsed;
+            roomDoc.blackRemainigTime = Math.max(roomDoc.blackRemainigTime, 0);
         }
-    });
-
-    return changeStream;
+    }
+    roomDoc.lastMove = Date.now();
 };
 
 export const getRoomById = async (id: string) => {
     try {
         const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
         if (!room) throw error500("Room not found");
+
+        updateRemainingTime(room);
 
         return room;
     } catch (error) {
@@ -102,9 +134,9 @@ export const pushMessage = async (
     message: { username: string; message: string }
 ) => {
     try {
-        const room = await roomModel.findOneAndUpdate(
-            { _id: new mongoose.Types.ObjectId(id) },
-            { $push: { chats: { ...message, id: Date.now() } } },
+        const room = await roomModel.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $push: { chats: { ...message } } },
             { new: true }
         );
         if (!room) throw error500("Room not found");
@@ -112,4 +144,48 @@ export const pushMessage = async (
     } catch (error) {
         throw error500("Couldn't push message");
     }
+};
+
+export const pushMove = async (id: string, fen: string, turn: "w" | "b") => {
+    try {
+        const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
+        if (!room) throw error500("Room not found");
+
+        updateRemainingTime(room);
+
+        room.boardHistory.push(fen);
+        room.turn = turn;
+        room.timerStarted = true;
+
+        await room.save();
+
+        return room;
+    } catch (error) {
+        throw error500("Couldn't push move");
+    }
+};
+
+export const finishGame = async (id: string) => {
+    try {
+        const room = await roomModel.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { finished: true }
+        );
+        if (!room) throw error500("Room not found");
+
+        roomsChangeEmitter.emitRoomsChange({
+            data: { id, black: room.black, white: room.white },
+            type: RoomsChangeType.ROOM_DELETE,
+        });
+
+        return room;
+    } catch (error) {
+        throw error500("Couldn't remove room");
+    }
+};
+
+export const subscribeRoomChange = (callback: (room: IRoomsChange) => void) => {
+    roomsChangeEmitter.onRoomChange(callback);
+    console.log({ roomEv: roomsChangeEmitter.eventNames() });
+    return () => roomsChangeEmitter.offRoomChange(callback);
 };

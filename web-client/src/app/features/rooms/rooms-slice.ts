@@ -5,7 +5,7 @@ import {
     addRoomController,
     removeRoomController,
     setRoomsController,
-} from "./actioin-controllers";
+} from "./action-controllers";
 
 const roomsSlice = createSlice({
     name: "rooms",

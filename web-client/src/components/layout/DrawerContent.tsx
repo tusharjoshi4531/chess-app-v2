@@ -28,16 +28,16 @@ const CommonButtonGroup: React.FC<IButtonGroupListProps> = ({ onClick }) => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem>
-                    <Badge
-                        badgeContent={count}
-                        color="secondary"
-                        overlap="rectangular"
-                        variant="standard"
-                    >
-                        <ListItemButton onClick={onClick.bind(this, "Game")}>
+                    <ListItemButton onClick={onClick.bind(this, "Game")}>
+                        <Badge
+                            badgeContent={count}
+                            color="secondary"
+                            overlap="rectangular"
+                            variant="standard"
+                        >
                             <ListItemText primary={"Game"} />
-                        </ListItemButton>
-                    </Badge>
+                        </Badge>
+                    </ListItemButton>
                 </ListItem>
             </List>
             <Divider />

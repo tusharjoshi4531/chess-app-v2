@@ -1,3 +1,4 @@
+import { EventEmitter } from "stream";
 import { error500 } from "../error/app.error";
 import notificationModel, {
     INotification,
@@ -13,9 +14,35 @@ export enum NotificationChagneType {
 }
 
 interface INotificationChange {
-    data: ISavedNotification | { id: string };
+    data: ISavedNotification | { id: string; to: string };
     type: NotificationChagneType;
 }
+
+// Event emiter
+class NotificationEventEmitter extends EventEmitter {
+    constructor() {
+        super();
+    }
+
+    emitNotificationChange(notificationChange: INotificationChange) {
+        this.emit("notification/change", notificationChange);
+    }
+
+    onNotificationChange(
+        callback: (notificationChange: INotificationChange) => void
+    ) {
+        this.on("notification/change", callback);
+        console.log(this.eventNames());
+    }
+
+    offNotificationChange(
+        callback: (notificationChange: INotificationChange) => void
+    ) {
+        this.off("notification/change", callback);
+    }
+}
+
+const notificationEventEmitter = new NotificationEventEmitter();
 
 // Functions and methods
 export const createNotification = async (
@@ -28,6 +55,12 @@ export const createNotification = async (
             ...notification,
             timestamp: Date.now() + life,
         });
+
+        notificationEventEmitter.emitNotificationChange({
+            data: transformNotificationDoc(res),
+            type: NotificationChagneType.NOTIFICATION_INSERT,
+        });
+
         return res;
     } catch (error) {
         console.log(error);
@@ -38,6 +71,14 @@ export const createNotification = async (
 export const deleteNotification = async (notificationId: string) => {
     try {
         const res = await notificationModel.findByIdAndDelete(notificationId);
+
+        if (!res) throw error500("Error deleting notification");
+
+        notificationEventEmitter.emitNotificationChange({
+            data: { id: notificationId, to: res.to },
+            type: NotificationChagneType.NOTIFICATION_DELETE,
+        });
+
         return res;
     } catch (error) {
         throw error500("Error deleting notification");
@@ -68,36 +109,37 @@ export const getNotifications = async (username: string) => {
 };
 
 export const subscribeNotificationChange = (
-    username: string,
     callback: (notificationChange: INotificationChange) => void
 ) => {
-    const pipeline = [
-        {
-            $match: {
-                $or: [
-                    { "fullDocument.to": username },
-                    { operationType: "delete" },
-                ],
-            },
-        },
-    ];
-
-    const changeStream = notificationModel
-        .watch(pipeline)
-        .on("change", (data) => {
-            if (data.operationType === "insert") {
-                callback({
-                    data: transformNotificationDoc(
-                        data.fullDocument as INotificationDoc
-                    ),
-                    type: NotificationChagneType.NOTIFICATION_INSERT,
-                });
-            } else if (data.operationType === "delete") {
-                callback({
-                    data: { id: data.documentKey._id },
-                    type: NotificationChagneType.NOTIFICATION_DELETE,
-                });
-            }
-        });
-    return changeStream;
+    notificationEventEmitter.onNotificationChange(callback)
+    console.log(notificationModel.eventNames());
+    return () => notificationEventEmitter.offNotificationChange(callback);
+    // const pipeline = [
+    //     {
+    //         $match: {
+    //             $or: [
+    //                 { "fullDocument.to": username },
+    //                 { operationType: "delete" },
+    //             ],
+    //         },
+    //     },
+    // ];
+    // const changeStream = notificationModel
+    //     .watch(pipeline)
+    //     .on("change", (data) => {
+    //         if (data.operationType === "insert") {
+    //             callback({
+    //                 data: transformNotificationDoc(
+    //                     data.fullDocument as INotificationDoc
+    //                 ),
+    //                 type: NotificationChagneType.NOTIFICATION_INSERT,
+    //             });
+    //         } else if (data.operationType === "delete") {
+    //             callback({
+    //                 data: { id: data.documentKey._id },
+    //                 type: NotificationChagneType.NOTIFICATION_DELETE,
+    //             });
+    //         }
+    //     });
+    // return changeStream;
 };

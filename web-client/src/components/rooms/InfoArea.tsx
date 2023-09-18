@@ -2,6 +2,7 @@ import {
     Button,
     Card,
     Divider,
+    List,
     Paper,
     Stack,
     TextField,
@@ -10,12 +11,12 @@ import {
 import React, { ChangeEvent, useState } from "react";
 
 interface IInfoAreaProps {
-    chats?: { id: string; username: string; message: string }[];
+    chats: { id: string; username: string; message: string }[];
     onSendMessage?: (message: string) => void;
 }
 
 const InfoArea: React.FC<IInfoAreaProps> = ({
-    chats = [],
+    chats,
     onSendMessage = () => {},
 }) => {
     const [message, setMessage] = useState("");
@@ -26,6 +27,7 @@ const InfoArea: React.FC<IInfoAreaProps> = ({
         setMessage(e.target.value);
     };
 
+    console.log({ chats });
     const chatComponents = chats.map((chat) => {
         return (
             <Typography key={chat.id}>
@@ -37,13 +39,15 @@ const InfoArea: React.FC<IInfoAreaProps> = ({
     return (
         <Card sx={{ height: "100%", display: "flex" }} variant="outlined">
             <Stack flex={1} spacing={1} p={1}>
-                <Paper variant="outlined" sx={{ flex: 1, minHeight: 300 }}>
+                <Paper variant="outlined" sx={{ flex: 1, minHeight: 300, overflow:"scroll" }}>
                     <Typography textAlign="center" marginY="2px">
                         <b>Chat Box</b>
                     </Typography>
                     <Divider />
+                    <List sx={{ overflow: "auto", maxHeight: 300 }}>
+                        {chatComponents}
+                    </List>
                 </Paper>
-                {chatComponents}
                 <Stack direction="row" spacing={1}>
                     <TextField
                         fullWidth

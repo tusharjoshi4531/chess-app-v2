@@ -2,19 +2,15 @@ import { Server, Socket } from "socket.io";
 import { getUsernameFromSocketId } from "../service/live-user.service";
 import { IRoom } from "../model/room.model";
 import { AppError, error500 } from "../error/app.error";
-import { getRoomById, pushMessage, transformRoom } from "../service/room.service";
+import {
+    getRoomById,
+    pushMessage,
+    pushMove,
+    finishGame,
+    transformRoom,
+} from "../service/room.service";
 
-interface IChallengeUserPayload {
-    from: string;
-    to: string;
-    time: {
-        minutes: number;
-        seconds: number;
-    };
-    color: number;
-}
-
-const challengeControllers = (io: Server, socket: Socket) => {
+const roomControllers = (io: Server, socket: Socket) => {
     console.log({ auth: socket.handshake.auth });
 
     const joinRoom = async (
@@ -40,7 +36,7 @@ const challengeControllers = (io: Server, socket: Socket) => {
 
     const sendMessage = async (
         data: { roomid: string; message: string },
-        cb?: (error: AppError | null, data: IRoom | null) => void
+        cb?: (error: AppError | null) => void
     ) => {
         try {
             const username = await getUsernameFromSocketId(socket.id);
@@ -51,43 +47,65 @@ const challengeControllers = (io: Server, socket: Socket) => {
             });
 
             const room = await getRoomById(data.roomid);
-            
-            socket.to(data.roomid).emit("room/data", {
-                data: transformRoom(room),
-            });
 
-            cb && cb(null, null);
+            io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
-            cb && cb(error as AppError, null);
+            cb && cb(error as AppError);
+        }
+    };
+
+    const sendMove = async (
+        data: { roomid: string; fen: string; turn: "w" | "b" },
+        cb?: (error: AppError | null) => void
+    ) => {
+        try {
+            console.log(data);
+
+            await pushMove(data.roomid, data.fen, data.turn);
+            const room = await getRoomById(data.roomid);
+
+            io.to(data.roomid).emit("room/data", transformRoom(room));
+        } catch (error) {
+            cb && cb(error as AppError);
+        }
+    };
+
+    const sendResign = async (
+        data: { roomid: string; username: string },
+        cb?: (error: AppError | null) => void
+    ) => {
+        try {
+            const room = await finishGame(data.roomid);
+
+            io.to(data.roomid).emit("room/result", `${data.username} resigned`);
+            io.to(data.roomid).emit("room/data", transformRoom(room));
+        } catch (error) {
+            cb && cb(error as AppError);
+        }
+    };
+
+    const sendChckmate = async (
+        data: { roomid: string; username: string },
+        cb?: (error: AppError | null) => void
+    ) => {
+        try {
+            const room = await finishGame(data.roomid);
+
+            io.to(data.roomid).emit(
+                "room/result",
+                `${data.username} won by checkmate`
+            );
+            io.to(data.roomid).emit("room/data", transformRoom(room));
+        } catch (error) {
+            cb && cb(error as AppError);
         }
     };
 
     socket.on("room/join", joinRoom);
     socket.on("room/send-message", sendMessage);
-
-    // const challengUser = async (
-    //     data: IChallengeUserPayload,
-    //     callback: (success: boolean, body: string) => void
-    // ) => {
-    //     try {
-    //         console.log(data);
-
-    //         const socketId = await getUserSocketId(data.to);
-
-    //         if (socketId === "") return callback(false, "User not online");
-
-    //         io.to(socketId).emit("challenge-user/receive", {
-    //             payload: data,
-    //             expiresIn: 300000,
-    //         }); // 5 mins expire time
-
-    //         callback(true, "Sent request");
-    //     } catch (error) {
-    //         callback(false, "something went wrong while challenging user");
-    //     }
-    // };
-
-    // socket.on("challenge-user/send", challengUser);
+    socket.on("room/send-move", sendMove);
+    socket.on("room/send-resign", sendResign);
+    socket.on("room/send-checkmate", sendChckmate);
 };
 
-export default challengeControllers;
+export default roomControllers;

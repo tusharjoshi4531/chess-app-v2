@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { INotification } from "../model/notification.model";
+import { INotification, ISavedNotification } from "../model/notification.model";
 import {
     NotificationChagneType,
     createNotification,
@@ -16,7 +16,6 @@ export const subscribe: RequestHandler<
     {}
 > = async (req, res, next) => {
     if (!req.params.username) return next(error400("Username is required"));
-    
 
     const notifications = await getNotifications(req.params.username);
 
@@ -28,21 +27,24 @@ export const subscribe: RequestHandler<
     res.write(`id: ${req.body.ssid}\n`);
     res.write(`data: ${JSON.stringify(notificationMessage)}\n\n`);
 
-    const changeStreem = subscribeNotificationChange(
-        req.params.username,
-        (notification) => {
-            const changeMessage = {
-                type: notification.type,
-                data: notification.data,
-            };
+    const cleanup = subscribeNotificationChange((notification) => {
+        const irreleventChange =
+            (notification.data as ISavedNotification).to !==
+            req.params.username;
 
-            res.write(`id: ${req.body.ssid}\n`);
-            res.write(`data: ${JSON.stringify(changeMessage)}\n\n`);
-        }
-    );
+        if (irreleventChange) return;
+
+        const changeMessage = {
+            type: notification.type,
+            data: notification.data,
+        };
+
+        res.write(`id: ${req.body.ssid}\n`);
+        res.write(`data: ${JSON.stringify(changeMessage)}\n\n`);
+    });
 
     req.on("close", () => {
-        changeStreem.close();
+        cleanup();
     });
 };
 
