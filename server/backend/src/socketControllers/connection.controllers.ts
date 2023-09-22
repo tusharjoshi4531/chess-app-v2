@@ -8,7 +8,9 @@ const connectionControllers = (io: Server, socket: Socket) => {
         console.log(`${socket.id} disconnected`);
     };
 
+    console.log("Connected User " + socket.id)
     socket.emit("user-connected");
+    console.log("Emitted connected event");
 
     socket.on("disconnect", disconnect);
 };

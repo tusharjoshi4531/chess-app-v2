@@ -17,11 +17,13 @@ const roomControllers = (io: Server, socket: Socket) => {
         data: { roomid: string },
         cb: (error: AppError | null, data: IRoom | null) => void
     ) => {
-        console.log({data});
+        console.log({ joinRoomData: data });
 
         try {
             const room = await getRoomById(data.roomid);
             if (!room) throw error500("Room not found");
+
+            console.log({ room });
 
             const username = await getUsernameFromSocketId(socket.id);
 
@@ -30,6 +32,7 @@ const roomControllers = (io: Server, socket: Socket) => {
 
             cb(null, transformRoom(room));
         } catch (error) {
+            console.log("Error in joinRoom");
             console.log(error);
             cb(error as AppError, null);
         }

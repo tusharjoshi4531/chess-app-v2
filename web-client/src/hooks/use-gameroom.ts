@@ -65,6 +65,7 @@ export const useGameRoom = () => {
         };
 
         const onConnect = () => {
+            console.log("Connection Successfull");
             socket.emit("room/join", { roomid }, receiveRoomData);
         };
 
@@ -89,6 +90,8 @@ export const useGameRoom = () => {
             disconnect();
             socket.off("user-connected", onConnect);
             socket.off("room/user-joined", onOtherJoinRoom);
+            socket.off("room/data", onRoomData);
+            socket.off("room/result", onGameResult);
         };
     }, [socket]);
 
