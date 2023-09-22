@@ -32,7 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             navigate("/");
             return;
         }
-        if (buttonClick === "Profile") return;
+        if (buttonClick === "Profile") targetUrl = "/profile";
         navigate(targetUrl);
     };
 

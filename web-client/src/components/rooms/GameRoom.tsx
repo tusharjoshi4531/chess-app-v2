@@ -26,6 +26,8 @@ const GameRoom = () => {
         sendMoveHandler,
         sendResign,
         sendChckmate,
+        sendDraw,
+        sendTimeout,
     } = useGameRoom();
 
     console.log(roomState);
@@ -40,6 +42,14 @@ const GameRoom = () => {
         if (gameStatus === "checkmate") {
             sendChckmate(username);
         }
+
+        if (gameStatus === "draw") {
+            sendDraw(username);
+        }
+    };
+
+    const timeoutHandler = (username: string) => {
+        sendTimeout(username);
     };
 
     const resignHandler = () => {
@@ -86,6 +96,7 @@ const GameRoom = () => {
                                 timerStarted={roomState.timerStarted}
                                 finished={roomState.finished}
                                 onMoveComplete={moveCompleteHandler}
+                                onTimeout={timeoutHandler}
                             />
                         </Grid>
                         <Grid item md={4} xs={12}>

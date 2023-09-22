@@ -4,6 +4,7 @@ import { removeLiveUser } from "../service/live-user.service";
 const connectionControllers = (io: Server, socket: Socket) => {
     const disconnect = async () => {
         removeLiveUser({ socketId: socket.id });
+        console.log(socket.rooms)
         console.log(`${socket.id} disconnected`);
     };
 

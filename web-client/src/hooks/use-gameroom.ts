@@ -68,7 +68,7 @@ export const useGameRoom = () => {
         };
 
         const onRoomData = (data: IRoomData) => {
-            console.log({ chatUpdate: data });
+            console.log({ updatedData: data });
             setRoomState(data);
         };
 
@@ -135,6 +135,32 @@ export const useGameRoom = () => {
         );
     };
 
+    const sendDraw = (username: string) => {
+        if (!socket || !roomid || roomState.finished) return;
+        socket.emit(
+            "room/send-draw",
+            { roomid, username },
+            (error: unknown) => {
+                if (error) {
+                    alert.error("Couldn't update draw status in server");
+                }
+            }
+        );
+    };
+
+    const sendTimeout = (username: string) => {
+        if (!socket || !roomid || roomState.finished) return;
+        socket.emit(
+            "room/send-timeout",
+            { roomid, username },
+            (error: unknown) => {
+                if (error) {
+                    alert.error("Couldn't update timeout status in server");
+                }
+            }
+        );
+    };
+
     return {
         sendMessageHandler,
         roomState,
@@ -143,5 +169,7 @@ export const useGameRoom = () => {
         sendMoveHandler,
         sendResign,
         sendChckmate,
+        sendDraw,
+        sendTimeout,
     };
 };

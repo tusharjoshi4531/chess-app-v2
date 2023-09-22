@@ -77,6 +77,8 @@ const roomControllers = (io: Server, socket: Socket) => {
         try {
             const room = await finishGame(data.roomid);
 
+            console.log(room);
+
             io.to(data.roomid).emit("room/result", `${data.username} resigned`);
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
@@ -101,11 +103,45 @@ const roomControllers = (io: Server, socket: Socket) => {
         }
     };
 
+    const sendDraw = async (
+        data: { roomid: string; username: string },
+
+        cb?: (error: AppError | null) => void
+    ) => {
+        try {
+            const room = await finishGame(data.roomid);
+
+            io.to(data.roomid).emit("room/result", `Game ended in a Draw`);
+            io.to(data.roomid).emit("room/data", transformRoom(room));
+        } catch (error) {
+            cb && cb(error as AppError);
+        }
+    };
+
+    const sendTimeout = async (
+        data: { roomid: string; username: string },
+        cb?: (error: AppError | null) => void
+    ) => {
+        try {
+            const room = await finishGame(data.roomid);
+
+            io.to(data.roomid).emit(
+                "room/result",
+                `${data.username} lost by timeout`
+            );
+            io.to(data.roomid).emit("room/data", transformRoom(room));
+        } catch (error) {
+            cb && cb(error as AppError);
+        }
+    };
+
     socket.on("room/join", joinRoom);
     socket.on("room/send-message", sendMessage);
     socket.on("room/send-move", sendMove);
     socket.on("room/send-resign", sendResign);
     socket.on("room/send-checkmate", sendChckmate);
+    socket.on("room/send-draw", sendDraw);
+    socket.on("room/send-timeout", sendTimeout);
 };
 
 export default roomControllers;

@@ -1,13 +1,22 @@
 import axios from "axios";
 import { SERVER_URL } from "../config/config";
 import { makeRequest } from "../util/request";
-import { IChallengeUserPayload } from "../components/forms/ChallengeUserForm";
+import {
+    ChoosePlayerColor,
+    IChallengeUserPayload,
+} from "../components/forms/ChallengeUserForm";
 
 const constructChallenge = (challenge: IChallengeUserPayload) => ({
     status: "pending",
     time: challenge.time,
-    black: challenge.from,
-    white: challenge.to,
+    black:
+        challenge.color === ChoosePlayerColor.BLACK
+            ? challenge.from
+            : challenge.to,
+    white:
+        challenge.color === ChoosePlayerColor.WHITE
+            ? challenge.from
+            : challenge.to,
 });
 
 export const challengeUser = async (
@@ -15,7 +24,13 @@ export const challengeUser = async (
     accessToken: string,
     refreshToken: string
 ) => {
-    console.log(challenge);
+    if (challenge.color === ChoosePlayerColor.EITHER) {
+        challenge.color =
+            Math.random() > 0.5
+                ? ChoosePlayerColor.WHITE
+                : ChoosePlayerColor.BLACK;
+    }
+
     const challengeBody = {
         ...constructChallenge(challenge),
         from: challenge.from,

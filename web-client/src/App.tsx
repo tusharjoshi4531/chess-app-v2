@@ -57,6 +57,9 @@ function App() {
                     <Route path="" element={<RoomPageContent />} />
                     <Route path="room/:roomid" element={<GameRoom />} />
                 </Route>
+                <Route path="/profile" element={<div>Comming Soon</div>} />
+                <Route path="/social" element={<div>Comming Soon</div>} />
+                <Route path="/open-challenge" element={<div>Comming Soon</div>} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Layout>

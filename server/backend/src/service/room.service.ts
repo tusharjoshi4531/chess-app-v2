@@ -167,11 +167,15 @@ export const pushMove = async (id: string, fen: string, turn: "w" | "b") => {
 
 export const finishGame = async (id: string) => {
     try {
-        const room = await roomModel.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { finished: true }
-        );
+        const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
         if (!room) throw error500("Room not found");
+
+        updateRemainingTime(room);
+
+        room.timerStarted = false;
+        room.finished = true;
+
+        await room.save();
 
         roomsChangeEmitter.emitRoomsChange({
             data: { id, black: room.black, white: room.white },

@@ -6,22 +6,27 @@ import { useSelector } from "react-redux";
 import { IStore } from "../../app/store";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 import { IGameState } from "../../hooks/use-gameroom";
+import _ from "lodash";
 
 const Timer: React.FC<{
     username: string;
     timeInMs: number;
     startTimer: boolean;
-}> = ({ timeInMs, username, startTimer }) => {
+    onTimeout?: () => void;
+}> = ({ timeInMs, username, startTimer, onTimeout }) => {
     const [timeInSeconds, setTimeInSeconds] = useState(
         Math.round(timeInMs / 1000)
     );
 
     useEffect(() => {
         setTimeInSeconds(Math.round(timeInMs / 1000));
-        if (!startTimer || !timeInSeconds) return;
 
+        if (!startTimer || !timeInSeconds) return;
         const interval = setInterval(() => {
-            setTimeInSeconds((state) => state - 1);
+            setTimeInSeconds((state) => {
+                if (state === 1) onTimeout?.();
+                return Math.max(0, state - 1);
+            });
         }, 1000);
 
         return () => {
@@ -60,6 +65,7 @@ interface IGameAreaProps {
         turn: "w" | "b",
         gameState: "checkmate" | "draw" | "continue"
     ) => void;
+    onTimeout: (username: string) => void;
 }
 
 const GameArea: React.FC<IGameAreaProps> = ({
@@ -71,6 +77,7 @@ const GameArea: React.FC<IGameAreaProps> = ({
     boardHistory,
     finished,
     onMoveComplete,
+    onTimeout,
 }) => {
     console.log({ blackTime, whiteTime, timerStarted });
 
@@ -99,18 +106,25 @@ const GameArea: React.FC<IGameAreaProps> = ({
         try {
             if (!pieceIsValid(piece) || finished) return false;
 
+            const newGame = _.cloneDeep(game);
+
             game.move({
                 from: sourceSquare,
                 to: targetSquare,
                 promotion: "q",
             });
 
-            const newGame = new Chess(game.fen());
             setGame(newGame);
+
+            const isDraw =
+                game.isThreefoldRepetition() ||
+                game.isDraw() ||
+                game.isStalemate() ||
+                game.isInsufficientMaterial();
 
             let state: IGameState = "continue";
             state = game.isCheckmate() ? "checkmate" : state;
-            state = game.isDraw() ? "draw" : state;
+            state = isDraw ? "draw" : state;
 
             onMoveComplete(game.fen(), game.turn(), state);
 
@@ -129,6 +143,7 @@ const GameArea: React.FC<IGameAreaProps> = ({
             return;
 
         // Does not support viewing history yet
+        // Does not support 3 - fold repitition yet
         const newGame = new Chess(boardHistory[boardHistory.length - 1]);
         setGame(newGame);
     }, [boardHistory]);
@@ -138,7 +153,10 @@ const GameArea: React.FC<IGameAreaProps> = ({
             <Timer
                 username={oponent}
                 timeInMs={color === "white" ? blackTime : whiteTime}
-                startTimer={game.turn() !== color[0] && timerStarted && !finished}
+                startTimer={
+                    game.turn() !== color[0] && timerStarted && !finished
+                }
+                onTimeout={onTimeout.bind(null, username)}
             />
             <Chessboard
                 position={game.fen()}
