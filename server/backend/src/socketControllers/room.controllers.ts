@@ -30,6 +30,7 @@ const roomControllers = (io: Server, socket: Socket) => {
 
             cb(null, transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb(error as AppError, null);
         }
     };
@@ -50,6 +51,7 @@ const roomControllers = (io: Server, socket: Socket) => {
 
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };
@@ -66,6 +68,7 @@ const roomControllers = (io: Server, socket: Socket) => {
 
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };
@@ -82,6 +85,7 @@ const roomControllers = (io: Server, socket: Socket) => {
             io.to(data.roomid).emit("room/result", `${data.username} resigned`);
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };
@@ -99,6 +103,7 @@ const roomControllers = (io: Server, socket: Socket) => {
             );
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };
@@ -114,6 +119,7 @@ const roomControllers = (io: Server, socket: Socket) => {
             io.to(data.roomid).emit("room/result", `Game ended in a Draw`);
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };
@@ -131,6 +137,7 @@ const roomControllers = (io: Server, socket: Socket) => {
             );
             io.to(data.roomid).emit("room/data", transformRoom(room));
         } catch (error) {
+            console.log(error);
             cb && cb(error as AppError);
         }
     };

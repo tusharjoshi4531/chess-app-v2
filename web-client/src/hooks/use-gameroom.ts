@@ -46,6 +46,7 @@ export const useGameRoom = () => {
     const [roomState, setRoomState] = useState(dummyState);
 
     useEffect(() => {
+
         if (!socket) {
             connect();
             return;
@@ -81,6 +82,8 @@ export const useGameRoom = () => {
         socket.on("room/user-joined", onOtherJoinRoom);
         socket.on("room/data", onRoomData);
         socket.on("room/result", onGameResult);
+
+        console.log({socket});
 
         return () => {
             disconnect();
