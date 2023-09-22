@@ -17,7 +17,7 @@ const roomControllers = (io: Server, socket: Socket) => {
         data: { roomid: string },
         cb: (error: AppError | null, data: IRoom | null) => void
     ) => {
-        console.log(data);
+        console.log({data});
 
         try {
             const room = await getRoomById(data.roomid);
