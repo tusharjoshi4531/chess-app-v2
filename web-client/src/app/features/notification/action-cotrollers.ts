@@ -1,7 +1,7 @@
 import { INotification, INotificationState } from "./types";
 
 export const setNotificationsController = (
-    state: INotificationState,
+    _: INotificationState,
     action: { payload: INotification[] }
 ) => ({
     notifications: action.payload as INotification[],

@@ -1,4 +1,4 @@
-import { IUserState } from "../app/features/user/user-slice";
+import { IUserState } from "../app/features/user/types";
 
 // Auth
 export interface ISignupData {
