@@ -2,20 +2,32 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "./components/layout/Layout";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
 import "./App.css";
-import SignUpForm from "./components/forms/SignUpForm";
 import { useSelector } from "react-redux";
 import { IStore } from "./app/store";
 import HomepageContent from "./components/homepage/HomepageContent";
-import ChallengeUserForm from "./components/forms/ChallengeUserForm";
 import { useSocket } from "./hooks/use-socket";
-import NotificationsPage from "./pages/NotificationsPage";
 import GamePage from "./pages/GamePage";
-import RoomPageContent from "./components/rooms/RoomPageContent";
-import GameRoom from "./components/rooms/GameRoom";
 import { useNotification } from "./hooks/use-notification";
 import { useRooms } from "./hooks/use-rooms";
+
+import { Suspense, lazy } from "react";
+
+const ChallengeUserForm = lazy(
+    () => import("./components/forms/ChallengeUserForm")
+);
+const GameRoom = lazy(() => import("./components/rooms/GameRoom"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const RoomPageContent = lazy(
+    () => import("./components/rooms/RoomPageContent")
+);
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+// const Room;
+
+const LazyComponent = ({ children }: { children: React.ReactNode }) => (
+    <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+);
 
 function App() {
     const userid = useSelector<IStore, string>((state) => state.user.userid);
@@ -28,16 +40,41 @@ function App() {
         <Layout>
             <Routes>
                 <Route path="/" element={<HomePage />}>
-                    <Route path="" element={<HomepageContent />} />
+                    <Route
+                        path=""
+                        element={
+                            <LazyComponent>
+                                <HomepageContent />
+                            </LazyComponent>
+                        }
+                    />
                     <Route
                         path="challenge-user"
-                        element={<ChallengeUserForm />}
+                        element={
+                            <LazyComponent>
+                                <ChallengeUserForm />
+                            </LazyComponent>
+                        }
                     />
                 </Route>
                 {userid === "" ? (
                     <>
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/signup" element={<SignUpForm />} />
+                        <Route
+                            path="/login"
+                            element={
+                                <LazyComponent>
+                                    <LoginPage />
+                                </LazyComponent>
+                            }
+                        />
+                        <Route
+                            path="/signup"
+                            element={
+                                <LazyComponent>
+                                    <SignupPage />
+                                </LazyComponent>
+                            }
+                        />
                         <Route
                             path="/notification"
                             element={<Navigate to="/" />}
@@ -49,17 +86,38 @@ function App() {
                         <Route path="/signup" element={<Navigate to="/" />} />
                         <Route
                             path="/notification"
-                            element={<NotificationsPage />}
+                            element={
+                                <LazyComponent>
+                                    <NotificationsPage />
+                                </LazyComponent>
+                            }
                         />
                     </>
                 )}
                 <Route path="/game" element={<GamePage />}>
-                    <Route path="" element={<RoomPageContent />} />
-                    <Route path="room/:roomid" element={<GameRoom />} />
+                    <Route
+                        path=""
+                        element={
+                            <LazyComponent>
+                                <RoomPageContent />
+                            </LazyComponent>
+                        }
+                    />
+                    <Route
+                        path="room/:roomid"
+                        element={
+                            <LazyComponent>
+                                <GameRoom />
+                            </LazyComponent>
+                        }
+                    />
                 </Route>
                 <Route path="/profile" element={<div>Comming Soon</div>} />
                 <Route path="/social" element={<div>Comming Soon</div>} />
-                <Route path="/open-challenge" element={<div>Comming Soon</div>} />
+                <Route
+                    path="/open-challenge"
+                    element={<div>Comming Soon</div>}
+                />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Layout>
