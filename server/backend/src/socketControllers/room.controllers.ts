@@ -8,6 +8,7 @@ import {
     pushMove,
     finishGame,
     transformRoom,
+    // joinUserToRoom,
 } from "../service/room.service";
 
 const roomControllers = (io: Server, socket: Socket) => {
@@ -26,6 +27,9 @@ const roomControllers = (io: Server, socket: Socket) => {
             console.log({ room });
 
             const username = await getUsernameFromSocketId(socket.id);
+
+            // // Join in database
+            // joinUserToRoom(username, data.roomid);
 
             socket.join(data.roomid);
             socket.to(data.roomid).emit("room/user-joined", username);

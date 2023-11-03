@@ -19,13 +19,15 @@ const GameRoom = () => {
     const username = useSelector<IStore, string>(
         (state) => state.user.username
     );
+
     const {
         roomState,
-        roomid,
+        roomExists,
+        localColor,
         sendMessageHandler,
         sendMoveHandler,
         sendResign,
-        sendChckmate,
+        sendCheckmate,
         sendDraw,
         sendTimeout,
     } = useGameRoom();
@@ -40,7 +42,7 @@ const GameRoom = () => {
         sendMoveHandler(fen, turn);
 
         if (gameStatus === "checkmate") {
-            sendChckmate(username);
+            sendCheckmate(username);
         }
 
         if (gameStatus === "draw") {
@@ -56,9 +58,9 @@ const GameRoom = () => {
         sendResign(username);
     };
 
-    if (!roomid) {
+    if (!roomExists) {
         return (
-            <Stack>
+            <Stack maxWidth={400} margin="auto">
                 <Typography variant="h4" textAlign="center" my={2}>
                     Can't find Room Id
                 </Typography>
@@ -90,6 +92,7 @@ const GameRoom = () => {
                             <GameArea
                                 black={roomState.black}
                                 white={roomState.white}
+                                localColor={localColor}
                                 blackTime={roomState.blackRemainigTime}
                                 whiteTime={roomState.whiteRemainigTime}
                                 boardHistory={roomState.boardHistory}
@@ -108,15 +111,17 @@ const GameRoom = () => {
                     </Grid>
                 </CardContent>
             </Card>
-            <Stack direction="row" my={2} justifyContent="center">
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={resignHandler}
-                >
-                    Resign
-                </Button>
-            </Stack>
+            {localColor !== "none" && (
+                <Stack direction="row" my={2} justifyContent="center">
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={resignHandler}
+                    >
+                        Resign
+                    </Button>
+                </Stack>
+            )}
         </>
     );
 };

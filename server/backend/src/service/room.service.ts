@@ -193,3 +193,51 @@ export const subscribeRoomChange = (callback: (room: IRoomsChange) => void) => {
     console.log({ roomEv: roomsChangeEmitter.eventNames() });
     return () => roomsChangeEmitter.offRoomChange(callback);
 };
+
+// export const joinUserToRoom = async (username: string, roomId: string) => {
+//     try {
+//         const room = await roomModel.findById(
+//             new mongoose.Types.ObjectId(roomId)
+//         );
+//         if (!room) throw error500("Room not found");
+
+//         if (room.white === username) {
+//             room.whiteConnected = true;
+//         } else if (room.black === username) {
+//             room.blackConnected = true;
+//         } else {
+//             room.spectators.push(username);
+//         }
+
+//         await room.save();
+
+//         return room;
+//     } catch (error) {
+//         throw error500("Couldn't join user to room");
+//     }
+// };
+
+// export const leaveUserFromRoom = async (username: string, roomId: string) => {
+//     try {
+//         const room = await roomModel.findById(
+//             new mongoose.Types.ObjectId(roomId)
+//         );
+//         if (!room) throw error500("Room not found");
+
+//         if (room.white === username) {
+//             room.whiteConnected = false;
+//         } else if (room.black === username) {
+//             room.blackConnected = false;
+//         } else {
+//             room.spectators = room.spectators.filter(
+//                 (spectator) => spectator !== username
+//             );
+//         }
+
+//         await room.save();
+
+//         return room;
+//     } catch (error) {
+//         throw error500("Couldn't leave user from room");
+//     }
+// };

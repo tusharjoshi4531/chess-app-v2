@@ -2,9 +2,11 @@ import { Paper, Stack, Typography } from "@mui/material";
 import { Chess } from "chess.js";
 import React, { useEffect, useState } from "react";
 import { Chessboard } from "react-chessboard";
-import { useSelector } from "react-redux";
-import { IStore } from "../../app/store";
-import { Piece, Square } from "react-chessboard/dist/chessboard/types";
+import {
+    BoardOrientation,
+    Piece,
+    Square,
+} from "react-chessboard/dist/chessboard/types";
 import { IGameState } from "../../hooks/use-gameroom";
 import _ from "lodash";
 
@@ -55,6 +57,8 @@ const Timer: React.FC<{
 interface IGameAreaProps {
     black: string;
     white: string;
+    localColor: BoardOrientation | "none";
+
     blackTime: number;
     whiteTime: number;
     timerStarted: boolean;
@@ -71,6 +75,7 @@ interface IGameAreaProps {
 const GameArea: React.FC<IGameAreaProps> = ({
     black,
     white,
+    localColor = "none",
     blackTime,
     whiteTime,
     timerStarted,
@@ -81,19 +86,24 @@ const GameArea: React.FC<IGameAreaProps> = ({
 }) => {
     console.log({ blackTime, whiteTime, timerStarted });
 
-    const [game, setGame] = useState(new Chess());
-    const username = useSelector<IStore, string>(
-        (state) => state.user.username
-    );
+    const orientation = localColor === "none" ? "white" : localColor;
 
-    const color = username === white ? "white" : "black";
-    const oponent = username === white ? black : white;
+    const localPlayerColor = orientation;
+    const oponentPlayerColor = orientation === "white" ? "black" : "white";
+    const localPlayer = orientation === "white" ? white : black;
+    const oponentPlayer = orientation === "white" ? black : white;
+    const localPlayerTime = orientation === "white" ? whiteTime : blackTime;
+    const oponentPlayerTime = orientation === "white" ? blackTime : whiteTime;
+
+    const arePiecesDraggable = localColor !== "none";
+
+    const [game, setGame] = useState(new Chess());
 
     const pieceIsValid = (piece: Piece) => {
         const valid =
             !game.isCheckmate() &&
-            piece[0] === color[0] &&
-            game.turn() === color[0];
+            piece[0] === localPlayerColor[0] &&
+            game.turn() === localPlayerColor[0];
 
         return valid;
     };
@@ -139,8 +149,9 @@ const GameArea: React.FC<IGameAreaProps> = ({
         if (
             boardHistory.length === 0 ||
             boardHistory[boardHistory.length - 1] === game.fen()
-        )
+        ) {
             return;
+        }
 
         // Does not support viewing history yet
         // Does not support 3 - fold repitition yet
@@ -151,25 +162,30 @@ const GameArea: React.FC<IGameAreaProps> = ({
     return (
         <Stack spacing={1}>
             <Timer
-                username={oponent}
-                timeInMs={color === "white" ? blackTime : whiteTime}
+                username={oponentPlayer}
+                timeInMs={oponentPlayerTime}
                 startTimer={
-                    game.turn() !== color[0] && timerStarted && !finished
+                    game.turn() === oponentPlayerColor[0] &&
+                    timerStarted &&
+                    !finished
                 }
-                onTimeout={onTimeout.bind(null, username)}
+                onTimeout={onTimeout.bind(null, localPlayer)}
             />
             <Chessboard
                 position={game.fen()}
                 onPieceDrop={pieceDropHandler}
-                boardOrientation={color}
-                arePiecesDraggable={!finished}
+                boardOrientation={orientation}
+                arePiecesDraggable={!finished && arePiecesDraggable}
             />
             <Timer
-                username={username}
-                timeInMs={color === "black" ? blackTime : whiteTime}
+                username={localPlayer}
+                timeInMs={localPlayerTime}
                 startTimer={
-                    game.turn() === color[0] && timerStarted && !finished
+                    game.turn() === localPlayerColor[0] &&
+                    timerStarted &&
+                    !finished
                 }
+                onTimeout={onTimeout.bind(null, oponentPlayer)}
             />
         </Stack>
     );

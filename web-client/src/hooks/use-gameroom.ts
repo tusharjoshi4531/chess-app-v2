@@ -2,6 +2,9 @@ import { useParams } from "react-router-dom";
 import { useAlert } from "./use-alert";
 import { useSocket } from "./use-socket";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { IStore } from "../app/store";
+import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 export interface IRoomData {
     id: string;
@@ -44,6 +47,13 @@ export const useGameRoom = () => {
     const alert = useAlert();
     const { socket, connect, disconnect } = useSocket();
     const [roomState, setRoomState] = useState(dummyState);
+    const [localColor, setLocalColor] = useState<BoardOrientation | "none">(
+        "none"
+    );
+    const [roomExists, setRoomExists] = useState(false);
+    const username = useSelector<IStore, string>(
+        (state) => state.user.username
+    );
 
     useEffect(() => {
         if (!socket) {
@@ -55,8 +65,19 @@ export const useGameRoom = () => {
             error: unknown | undefined,
             data: IRoomData
         ) => {
-            console.log(error, data);
+            if (error) {
+                alert.error("Couldn't join room");
+                return;
+            }
+
             setRoomState(data);
+            setRoomExists(true);
+
+            if (data.white === username) {
+                setLocalColor("white");
+            } else if (data.black == username) {
+                setLocalColor("black");
+            }
         };
 
         const onOtherJoinRoom = (username: string) => {
@@ -129,7 +150,7 @@ export const useGameRoom = () => {
         );
     };
 
-    const sendChckmate = (username: string) => {
+    const sendCheckmate = (username: string) => {
         if (!socket || !roomid || roomState.finished) return;
         socket.emit(
             "room/send-checkmate",
@@ -169,13 +190,15 @@ export const useGameRoom = () => {
     };
 
     return {
-        sendMessageHandler,
         roomState,
         socket,
         roomid,
+        localColor,
+        roomExists,
+        sendMessageHandler,
         sendMoveHandler,
         sendResign,
-        sendChckmate,
+        sendCheckmate,
         sendDraw,
         sendTimeout,
     };
