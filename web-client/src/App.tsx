@@ -12,6 +12,7 @@ import { useNotification } from "./hooks/use-notification";
 import { useRooms } from "./hooks/use-rooms";
 
 import { Suspense, lazy } from "react";
+import OpenChallengePage from "./pages/OpenChallengePage";
 
 const ChallengeUserForm = lazy(
     () => import("./components/forms/ChallengeUserForm")
@@ -114,10 +115,7 @@ function App() {
                 </Route>
                 <Route path="/profile" element={<div>Comming Soon</div>} />
                 <Route path="/social" element={<div>Comming Soon</div>} />
-                <Route
-                    path="/open-challenge"
-                    element={<div>Comming Soon</div>}
-                />
+                <Route path="/open-challenge" element={<OpenChallengePage />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Layout>

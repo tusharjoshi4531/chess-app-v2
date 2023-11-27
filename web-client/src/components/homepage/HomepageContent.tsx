@@ -62,7 +62,7 @@ const HomepageContent = () => {
                 <Grid item xs={12}>
                     <Typography variant="h2" textAlign="center">Welcome</Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={12}>
                     <CustomCardButton
                         title="Challenge User"
                         body="Challenge other users directly"
@@ -71,7 +71,7 @@ const HomepageContent = () => {
                         onClick={() => cardClickHandler("/challenge-user")}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                     <CustomCardButton
                         title="Open Challenge"
                         body="Create challenges open to all or accept them"
@@ -79,7 +79,7 @@ const HomepageContent = () => {
                         alt="open challenge"
                         onClick={() => cardClickHandler("/open-challenge")}
                     />
-                </Grid>
+                </Grid> */}
             </Grid>
         </Stack>
     );

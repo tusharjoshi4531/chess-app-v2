@@ -111,15 +111,6 @@ export default function LoginForm() {
                                 autoComplete="current-password"
                                 {...formik.getFieldProps("password")}
                             />
-                            {/* <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        value="remember"
-                                        color="primary"
-                                    />
-                                }
-                                label="Remember me"
-                            /> */}
                             <Button
                                 type="submit"
                                 fullWidth
@@ -127,6 +118,27 @@ export default function LoginForm() {
                                 sx={{ mt: 3, mb: 2 }}
                             >
                                 Sign In
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                sx={{ mb: 2 }}
+                                onClick={() => {
+                                    formik.setFieldValue("username", "Guest1");
+                                    formik.setFieldValue("password", "1234567");
+                                }}
+                            >
+                                Test Credentials 1
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                onClick={() => {
+                                    formik.setFieldValue("username", "Guest2");
+                                    formik.setFieldValue("password", "1234567");
+                                }}
+                            >
+                                Test Credentials 2
                             </Button>
                         </Box>
                     </Box>
