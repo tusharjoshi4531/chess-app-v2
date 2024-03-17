@@ -6,49 +6,45 @@ import axios from "axios";
 import { addLiveUser } from "../service/live-user.service";
 
 interface IAuthResult {
-    user: {
-        username: string;
-        userid: string;
-    };
-    accessToken: string;
-    refreshToken: string;
+  user: {
+    username: string;
+    userid: string;
+  };
+  accessToken: string;
+  refreshToken: string;
 }
 
 export const authenticateUser = async (
-    socket: Socket,
-    next: (err?: ExtendedError | undefined) => void
+  socket: Socket,
+  next: (err?: ExtendedError | undefined) => void
 ) => {
-    try {
-        const { accessToken, refreshToken } = socket.handshake.auth;
-        const { status, response, error } = await makeRequest<IAuthResult>(
-            AUTH_SERVER_URL,
-            "/authorize",
-            "",
-            (url) => axios.post<IAuthResult>(url, { accessToken, refreshToken })
-        );
+  try {
+    const { accessToken, refreshToken } = socket.handshake.auth;
+    const { status, response, error } = await makeRequest<IAuthResult>(
+      AUTH_SERVER_URL,
+      "/authorize",
+      "",
+      (url) => axios.post<IAuthResult>(url, { accessToken, refreshToken })
+    );
 
-        console.log({ error, response });
+    if (error || !response)
+      return next(new Error("Couldn't connect to live server"));
 
-        if (error || !response)
-            return next(new Error("Couldn't connect to live server"));
+    const { userid, username } = response.user;
 
-        const { userid, username } = response.user;
+    const addedUser = await addLiveUser({
+      userid,
+      username,
+      socketId: socket.id,
+    });
 
-        const addedUser = await addLiveUser({
-            userid,
-            username,
-            socketId: socket.id,
-        });
+    socket.emit("user-authenticated", {
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+    });
 
-        console.log({ addedUser });
-
-        socket.emit("user-authenticated", {
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-        });
-
-        next();
-    } catch (error) {
-        next(new Error("Couldn't connect to live server"));
-    }
+    next();
+  } catch (error) {
+    next(new Error("Couldn't connect to live server"));
+  }
 };

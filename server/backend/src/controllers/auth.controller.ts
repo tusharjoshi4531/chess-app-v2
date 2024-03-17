@@ -7,7 +7,6 @@ import _ from "lodash";
 
 const transformUserData = (data: Document) => {
     const user = { ..._.omit(data, ["_id", "__v"]), userid: data._id };
-    console.log(user);
     return user;
 };
 
