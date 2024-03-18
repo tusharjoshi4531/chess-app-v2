@@ -1,7 +1,7 @@
 import { Document, Schema, model } from "mongoose";
 import { ILiveUserData } from "../types";
 import { LIVE_USER_LIFE } from "../config/config";
-import { getCache } from "../service/redis.service";
+import { getCache } from "../service/rediscache.service";
 
 export interface ILiveUserDoc extends ILiveUserData, Document {
   updatedAt: Date;

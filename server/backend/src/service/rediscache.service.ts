@@ -1,7 +1,8 @@
 import Redis from "ioredis";
-import { REDIS_URL, TEN_MINUTES_IN_MS } from "../config/config";
+import { REDIS_CACHE_URL, TEN_MINUTES_IN_MS } from "../config/config";
 
-const client = REDIS_URL === "local" ? new Redis() : new Redis(REDIS_URL);
+const client =
+  REDIS_CACHE_URL === "local" ? new Redis() : new Redis(REDIS_CACHE_URL);
 
 client.on("connect", () => {
   console.log("connected to redis");

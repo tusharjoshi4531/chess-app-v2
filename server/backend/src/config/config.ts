@@ -1,8 +1,12 @@
 export const PORT = process.env.PORT || 8080;
 export const CORS_ORIGIN = process.env.CORS_ORIGIN;
+
 export const MONGO_CONNECTION_STRING =
   process.env.MONGO_CONNECTION_STRING || "";
-export const REDIS_URL = process.env.REDIS_URL || "local";
+
+export const REDIS_CACHE_URL = process.env.REDIS_CACHE_URL || "local";
+export const REDIS_PUBSUB_URL = process.env.REDIS_PUBSUB_URL || "local";
+
 export const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL as string;
 export const NOTIFICATION_SERVER_URL = process.env
   .NOTIFICATION_SERVER_URL as string;

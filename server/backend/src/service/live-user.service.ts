@@ -2,7 +2,7 @@ import { FilterQuery } from "mongoose";
 import liveUserModel from "../model/live-user.model";
 import { ILiveUserData } from "../types";
 import { error500 } from "../error/app.error";
-import { deleteCache, getCache, setCache } from "./redis.service";
+import { deleteCache, getCache, setCache } from "./rediscache.service";
 import { TEN_MINUTES_IN_MS } from "../config/config";
 
 export const addLiveUser = async (user: ILiveUserData) => {
