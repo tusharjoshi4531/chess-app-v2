@@ -12,9 +12,9 @@ const app = express();
 
 app.use(express.json());
 app.use(
-    cors({
-        origin: CORS_ORIGIN,
-    })
+  cors({
+    origin: CORS_ORIGIN,
+  })
 );
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/room", roomRouter);
@@ -24,10 +24,16 @@ app.use("/api/v1/rooms", roomRouter);
 
 app.use(globalErrorHandler);
 
+app.get("/healthCheck", (req, res) => {
+  res.status(200).json({
+    message: "healthy",
+  });
+});
+
 process.on("uncaughtException", (err) => {
-    console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-    console.log(err.name, err.message);
-    process.exit(1);
+  console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  process.exit(1);
 });
 
 export default app;
