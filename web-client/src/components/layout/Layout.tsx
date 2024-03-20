@@ -20,8 +20,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const dispatch = useDispatch();
     const alert = useAlert();
 
-    console.log(user);
-
     const onClick = (buttonClick: string) => {
         let targetUrl = `/${buttonClick}`;
         if (buttonClick === "Home") targetUrl = "/";

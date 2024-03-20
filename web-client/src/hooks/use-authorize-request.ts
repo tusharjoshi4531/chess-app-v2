@@ -31,7 +31,7 @@ export const useAuthorizeRequest = () => {
         error: IAuthResponseData | undefined;
     }) => {
         const { response, error } = res;
-        console.log({ response, error });
+        
 
         if (
             response !== undefined &&

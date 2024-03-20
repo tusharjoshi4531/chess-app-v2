@@ -27,7 +27,7 @@ const InfoArea: React.FC<IInfoAreaProps> = ({
         setMessage(e.target.value);
     };
 
-    console.log({ chats });
+    
     const chatComponents = chats.map((chat) => {
         return (
             <Typography key={chat.id}>

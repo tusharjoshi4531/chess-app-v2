@@ -38,7 +38,7 @@ const ChallengeNotification: React.FC<IChallengeNotificationProps> = ({
         const { response, error: errorAccept } = results[0];
         if (errorAccept) alert.error("couldn't accept challenge");
 
-        console.log(results); 
+        
 
         if (results.length > 1) {
             const { error: errorNotif } = results[1];

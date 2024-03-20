@@ -32,7 +32,7 @@ const GameRoom = () => {
         sendTimeout,
     } = useGameRoom();
 
-    console.log(roomState);
+    
 
     const moveCompleteHandler = (
         fen: string,

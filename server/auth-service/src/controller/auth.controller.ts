@@ -39,7 +39,6 @@ export const signup: RequestHandler<{}, {}, ISignupReqBody, {}> = async (
         const userDoc = await createUser(req.body);
         const userPayload = userDoc2Paylod(userDoc);
         const user = removePassword(userDoc);
-        console.log(user);
         const [accessToken, refreshToken] = generateTokens(userPayload);
         saveRefreshToken(refreshToken, user._id);
 
@@ -83,18 +82,14 @@ export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
     res,
     next
 ) => {
-    console.log(req.body);
     const { accessToken, refreshToken } = req.body;
 
     const refreshTokenIsValid = await isRefreshTokenValid(refreshToken);
-
-    console.log({ refreshTokenIsValid });
 
     if (!refreshTokenIsValid)
         return next(error401("Unauthorized: Refresh token not valid"));
 
     let user = await verifyAccessToken(accessToken);
-    console.log(user);
     if (user) {
         const newRefreshToken = createRefreshToken(user as IAccessTokenPayload);
         saveRefreshToken(
@@ -107,7 +102,6 @@ export const authorize: RequestHandler<{}, {}, IAuthorizeReqBody, {}> = async (
     }
 
     user = await verifyRefreshToken(refreshToken);
-    console.log({ user });
     if (user) {
         const [accessToken, refreshToken] = generateTokens(
             user as IAccessTokenPayload

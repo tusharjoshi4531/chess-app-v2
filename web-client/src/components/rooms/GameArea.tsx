@@ -84,7 +84,7 @@ const GameArea: React.FC<IGameAreaProps> = ({
     onMoveComplete,
     onTimeout,
 }) => {
-    console.log({ blackTime, whiteTime, timerStarted });
+
 
     const orientation = localColor === "none" ? "white" : localColor;
 
