@@ -63,7 +63,6 @@ class RoomsChangeEmitter extends EventEmitter {
 
     onRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
         this.on("rooms/change", callback);
-        console.log(this.eventNames());
     }
 
     offRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
@@ -190,7 +189,6 @@ export const finishGame = async (id: string) => {
 
 export const subscribeRoomChange = (callback: (room: IRoomsChange) => void) => {
     roomsChangeEmitter.onRoomChange(callback);
-    console.log({ roomEv: roomsChangeEmitter.eventNames() });
     return () => roomsChangeEmitter.offRoomChange(callback);
 };
 

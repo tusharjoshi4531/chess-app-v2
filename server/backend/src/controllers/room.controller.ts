@@ -16,7 +16,6 @@ export const subscribe: RequestHandler<
     if (!req.params.username) return next(error400("Username is required"));
 
     const rooms = await getRooms(req.params.username);
-    console.log({ rooms });
 
     const roomMessage = {
         type: RoomsChangeType.INITIAL_ROOMS,
@@ -27,12 +26,12 @@ export const subscribe: RequestHandler<
     res.write(`data: ${JSON.stringify(roomMessage)}\n\n`);
 
     const cleanUp = subscribeRoomChange((room) => {
-        console.log(room);
+        
         const irreleventChange =
             (room.data as ISavedRoom).white !== req.params.username &&
             (room.data as ISavedRoom).black !== req.params.username;
 
-        console.log({ irreleventChange });
+        
 
         if (irreleventChange) return;
 
@@ -49,5 +48,5 @@ export const subscribe: RequestHandler<
         cleanUp();
     });
 
-    console.log(req.params.username);
+    
 };

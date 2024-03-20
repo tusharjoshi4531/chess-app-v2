@@ -32,7 +32,7 @@ class NotificationEventEmitter extends EventEmitter {
         callback: (notificationChange: INotificationChange) => void
     ) {
         this.on("notification/change", callback);
-        console.log(this.eventNames());
+
     }
 
     offNotificationChange(
@@ -50,7 +50,6 @@ export const createNotification = async (
     life: number = 300000
 ) => {
     try {
-        console.log(notification);
         const res = await notificationModel.create({
             ...notification,
             timestamp: Date.now() + life,
@@ -112,7 +111,6 @@ export const subscribeNotificationChange = (
     callback: (notificationChange: INotificationChange) => void
 ) => {
     notificationEventEmitter.onNotificationChange(callback)
-    console.log(notificationModel.eventNames());
     return () => notificationEventEmitter.offNotificationChange(callback);
     // const pipeline = [
     //     {

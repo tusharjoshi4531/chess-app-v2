@@ -14,7 +14,7 @@ import { createRoom, transformRoom } from "../service/room.service";
 
 export const addChallenge: RequestHandler = async (req, res, next) => {
     try {
-        console.log(req.body);
+
         next(success201());
     } catch (error) {
         next(error);
@@ -27,7 +27,6 @@ export const challengeUser: RequestHandler<
     IChallenge & { from: string }
 > = async (req, res, next) => {
     try {
-        console.log(req.body);
         const { from } = req.body;
         const { targetUsername: to } = req.params;
 
@@ -80,8 +79,6 @@ export const acceptChallenge: RequestHandler<
     try {
         const { challengeId } = req.params;
         const { username } = req.body;
-
-        console.log({ challengeId, username });
 
         const challenge = await findChallenge(challengeId);
 
