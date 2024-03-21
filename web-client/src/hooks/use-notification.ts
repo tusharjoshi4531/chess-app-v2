@@ -34,7 +34,7 @@ export const useNotification = () => {
             alert.info("You have received a notification");
             dispatch(addNotifToState(notification));
         },
-        [alert.info, dispatch]
+        [alert, dispatch]
     );
 
     const setNotifications = useCallback(

@@ -8,7 +8,7 @@ import { IStore } from "./app/store";
 import HomepageContent from "./components/homepage/HomepageContent";
 import { useSocket } from "./hooks/use-socket";
 import GamePage from "./pages/GamePage";
-import { useNotification } from "./hooks/use-notification";
+import { useNotification } from "./hooks/use-notification2";
 import { useRooms } from "./hooks/use-rooms";
 
 import { Suspense, lazy } from "react";

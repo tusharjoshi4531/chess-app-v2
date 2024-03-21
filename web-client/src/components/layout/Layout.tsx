@@ -9,45 +9,45 @@ import { IStore } from "../../app/store";
 import { logout } from "../../services/auth.service";
 import { IUserState } from "../../app/features/user/types";
 import { useAlert } from "../../hooks/use-alert";
+import { useSocket } from "../../hooks/use-socket-2";
 
 interface LayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const navigate = useNavigate();
-    const user = useSelector<IStore, IUserState>((state) => state.user);
-    const dispatch = useDispatch();
-    const alert = useAlert();
+  const navigate = useNavigate();
+  const user = useSelector<IStore, IUserState>((state) => state.user);
+  const dispatch = useDispatch();
+  const alert = useAlert();
+  const { disconnect: disconnectSocket } = useSocket();
 
-    const onClick = (buttonClick: string) => {
-        let targetUrl = `/${buttonClick}`;
-        if (buttonClick === "Home") targetUrl = "/";
-        if (buttonClick === "Logout") {
-            dispatch(clearUser());
-            alert.info("Logged out");
-            logout(user.userid);
-            navigate("/");
-            return;
-        }
-        if (buttonClick === "Profile") targetUrl = "/profile";
-        navigate(targetUrl);
-    };
+  const onClick = (buttonClick: string) => {
+    let targetUrl = `/${buttonClick}`;
+    if (buttonClick === "Home") targetUrl = "/";
+    if (buttonClick === "Logout") {
+      dispatch(clearUser());
+      alert.info("Logged out");
+      logout(user.userid);
+      disconnectSocket();
+      navigate("/");
+      return;
+    }
+    if (buttonClick === "Profile") targetUrl = "/profile";
+    navigate(targetUrl);
+  };
 
-    return (
-        <ResponsiveDrawer
-            title="Chess"
-            mainContent={children}
-            drawerContent={
-                <Box>
-                    <DrawerContent
-                        username={user.username}
-                        onClick={onClick}
-                    />
-                </Box>
-            }
-        />
-    );
+  return (
+    <ResponsiveDrawer
+      title="Chess"
+      mainContent={children}
+      drawerContent={
+        <Box>
+          <DrawerContent username={user.username} onClick={onClick} />
+        </Box>
+      }
+    />
+  );
 };
 
 export default Layout;
