@@ -8,8 +8,68 @@ import {
   pushMove,
   finishGame,
   transformRoom,
+  subscribeRoomChange,
+  RoomsChangeType,
+  getRooms,
   // joinUserToRoom,
 } from "../service/room.service";
+
+export const roomInfoControllers = (io: Server, socket: Socket) => {
+  // Cleanup
+  let cleanup: () => void = () => {};
+
+  // controllers
+  const subscribeRooms = async (
+    data: { username: string },
+    cb: (error: AppError | null) => void
+  ) => {
+    try {
+      if (!data.username) throw error500("Username is required");
+
+      const rooms = await getRooms(data.username);
+
+      socket.emit("room/initial", rooms);
+
+      cleanup = subscribeRoomChange(data.username, (room) => {
+        const irreleventChange =
+          (room.data as IRoom).white !== data.username &&
+          (room.data as IRoom).black !== data.username;
+
+        if (irreleventChange) return;
+
+        const changeMessage = {
+          type: room.type,
+          data: room.data,
+        };
+
+        switch (room.type) {
+          case RoomsChangeType.ROOM_INSERT:
+            socket.emit("room/insert", changeMessage.data);
+            break;
+          case RoomsChangeType.ROOM_DELETE:
+            socket.emit("room/delete", changeMessage.data);
+            break;
+          default:
+            break;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+      cb && cb(err as AppError);
+    }
+  };
+
+  const unsubscribeRooms = () => {
+    cleanup();
+  };
+
+  // Bind events
+  socket.on("room/subscribe", subscribeRooms);
+  socket.on("room/unsubscribe", unsubscribeRooms);
+  socket.on("disconnect", () => {
+    cleanup();
+  });
+};
 
 const roomControllers = (io: Server, socket: Socket) => {
   const joinRoom = async (

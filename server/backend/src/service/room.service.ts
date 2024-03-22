@@ -1,195 +1,211 @@
 import mongoose from "mongoose";
 import { error500 } from "../error/app.error";
 import roomModel, {
-    IChatDoc,
-    IChatMessage,
-    IRoom,
-    IRoomDoc,
+  IChatDoc,
+  IChatMessage,
+  IRoom,
+  IRoomDoc,
 } from "../model/room.model";
 import { EventEmitter } from "stream";
 
 export enum RoomsChangeType {
-    INITIAL_ROOMS = "INITIAL_ROOMS",
-    ROOM_INSERT = "ROOM_INSERT",
-    ROOM_DELETE = "ROOM_DELETE",
+  INITIAL_ROOMS = "INITIAL_ROOMS",
+  ROOM_INSERT = "ROOM_INSERT",
+  ROOM_DELETE = "ROOM_DELETE",
 }
 
 export interface ISavedRoom extends IRoom {
-    id: string;
+  id: string;
 }
 
 interface IRoomsChange {
-    data:
-        | ISavedRoom
-        | {
-              id: string;
-              black: string;
-              white: string;
-          };
-    type: RoomsChangeType;
+  data:
+    | ISavedRoom
+    | {
+        id: string;
+        black: string;
+        white: string;
+      };
+  type: RoomsChangeType;
 }
 
 export const transformChat = (chat: IChatDoc): IChatMessage => ({
-    id: chat._id.toString(),
-    username: chat.username,
-    message: chat.message,
+  id: chat._id.toString(),
+  username: chat.username,
+  message: chat.message,
 });
 
 export const transformRoom = (doc: IRoomDoc): IRoom & { id: string } => ({
-    id: doc._id.toString(),
-    finished: doc.finished,
-    turn: doc.turn,
-    white: doc.white,
-    whiteConnected: doc.whiteConnected,
-    whiteRemainigTime: doc.whiteRemainigTime,
-    black: doc.black,
-    blackConnected: doc.blackConnected,
-    blackRemainigTime: doc.blackRemainigTime,
-    boardHistory: doc.boardHistory,
-    spectators: doc.spectators,
-    chats: doc.chats.map((chat) => transformChat(chat)),
-    lastMoveTime: doc.lastMoveTime,
-    timerStarted: doc.timerStarted,
+  id: doc._id.toString(),
+  finished: doc.finished,
+  turn: doc.turn,
+  white: doc.white,
+  whiteConnected: doc.whiteConnected,
+  whiteRemainigTime: doc.whiteRemainigTime,
+  black: doc.black,
+  blackConnected: doc.blackConnected,
+  blackRemainigTime: doc.blackRemainigTime,
+  boardHistory: doc.boardHistory,
+  spectators: doc.spectators,
+  chats: doc.chats.map((chat) => transformChat(chat)),
+  lastMoveTime: doc.lastMoveTime,
+  timerStarted: doc.timerStarted,
 });
 
 class RoomsChangeEmitter extends EventEmitter {
-    constructor() {
-        super();
-    }
+  private connectedUsers: Map<string, (roomChange: IRoomsChange) => void>;
+  constructor() {
+    super();
+    this.connectedUsers = new Map();
+  }
 
-    emitRoomsChange(roomsChange: IRoomsChange) {
-        this.emit("rooms/change", roomsChange);
-    }
+  emitRoomsChange(roomsChange: IRoomsChange) {
+    this.emit("rooms/change", roomsChange);
+  }
 
-    onRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
-        this.on("rooms/change", callback);
-    }
+  onRoomChange(
+    username: string,
+    callback: (roomsChagne: IRoomsChange) => void
+  ) {
+    const oldCallback = this.connectedUsers.get(username);
+    oldCallback && this.off("rooms/change", oldCallback);
 
-    offRoomChange(callback: (roomsChagne: IRoomsChange) => void) {
-        this.off("rooms/change", callback);
-    }
+    this.connectedUsers.set(username, callback);
+    this.on("rooms/change", callback);
+  }
+
+  offRoomChange(username: string) {
+    const callback = this.connectedUsers.get(username);
+    callback && this.off("rooms/change", callback);
+
+    this.connectedUsers.delete(username);
+  }
 }
 
 const roomsChangeEmitter = new RoomsChangeEmitter();
 
 export const createRoom = async (room: IRoom) => {
-    try {
-        const roomDoc = await roomModel.create(room);
+  try {
+    const roomDoc = await roomModel.create(room);
 
-        roomsChangeEmitter.emitRoomsChange({
-            data: transformRoom(roomDoc),
-            type: RoomsChangeType.ROOM_INSERT,
-        });
+    roomsChangeEmitter.emitRoomsChange({
+      data: transformRoom(roomDoc),
+      type: RoomsChangeType.ROOM_INSERT,
+    });
 
-        return roomDoc;
-    } catch (error) {
-        throw error500("Couldn't create room");
-    }
+    return roomDoc;
+  } catch (error) {
+    throw error500("Couldn't create room");
+  }
 };
 
 export const getRooms = async (username: string) => {
-    try {
-        const rooms = await roomModel.find({
-            $and: [
-                { finished: false },
-                { $or: [{ white: username }, { black: username }] },
-            ],
-        });
-        return rooms.map(transformRoom);
-    } catch (error) {
-        throw error500("Couldn't get rooms");
-    }
+  try {
+    const rooms = await roomModel.find({
+      $and: [
+        { finished: false },
+        { $or: [{ white: username }, { black: username }] },
+      ],
+    });
+    return rooms.map(transformRoom);
+  } catch (error) {
+    throw error500("Couldn't get rooms");
+  }
 };
 
 const updateRemainingTime = (roomDoc: IRoomDoc) => {
-    const timeElapsed = Date.now() - roomDoc.lastMove;
-    if (roomDoc.timerStarted) {
-        if (roomDoc.turn === "w") {
-            roomDoc.whiteRemainigTime -= timeElapsed;
-            roomDoc.whiteRemainigTime = Math.max(roomDoc.whiteRemainigTime, 0);
-        } else {
-            roomDoc.blackRemainigTime -= timeElapsed;
-            roomDoc.blackRemainigTime = Math.max(roomDoc.blackRemainigTime, 0);
-        }
+  const timeElapsed = Date.now() - roomDoc.lastMove;
+  if (roomDoc.timerStarted) {
+    if (roomDoc.turn === "w") {
+      roomDoc.whiteRemainigTime -= timeElapsed;
+      roomDoc.whiteRemainigTime = Math.max(roomDoc.whiteRemainigTime, 0);
+    } else {
+      roomDoc.blackRemainigTime -= timeElapsed;
+      roomDoc.blackRemainigTime = Math.max(roomDoc.blackRemainigTime, 0);
     }
-    roomDoc.lastMove = Date.now();
+  }
+  roomDoc.lastMove = Date.now();
 };
 
 export const getRoomById = async (id: string) => {
-    try {
-        const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
-        if (!room) throw error500("Room not found");
+  try {
+    const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
+    if (!room) throw error500("Room not found");
 
-        updateRemainingTime(room);
+    updateRemainingTime(room);
 
-        return room;
-    } catch (error) {
-        throw error500("Couldn't get room");
-    }
+    return room;
+  } catch (error) {
+    console.log(error);
+    throw error500("Couldn't get room");
+  }
 };
 
 export const pushMessage = async (
-    id: string,
-    message: { username: string; message: string }
+  id: string,
+  message: { username: string; message: string }
 ) => {
-    try {
-        const room = await roomModel.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $push: { chats: { ...message } } },
-            { new: true }
-        );
-        if (!room) throw error500("Room not found");
-        return room;
-    } catch (error) {
-        throw error500("Couldn't push message");
-    }
+  try {
+    const room = await roomModel.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(id),
+      { $push: { chats: { ...message } } },
+      { new: true }
+    );
+    if (!room) throw error500("Room not found");
+    return room;
+  } catch (error) {
+    throw error500("Couldn't push message");
+  }
 };
 
 export const pushMove = async (id: string, fen: string, turn: "w" | "b") => {
-    try {
-        const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
-        if (!room) throw error500("Room not found");
+  try {
+    const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
+    if (!room) throw error500("Room not found");
 
-        updateRemainingTime(room);
+    updateRemainingTime(room);
 
-        room.boardHistory.push(fen);
-        room.turn = turn;
-        room.timerStarted = true;
+    room.boardHistory.push(fen);
+    room.turn = turn;
+    room.timerStarted = true;
 
-        await room.save();
+    await room.save();
 
-        return room;
-    } catch (error) {
-        throw error500("Couldn't push move");
-    }
+    return room;
+  } catch (error) {
+    throw error500("Couldn't push move");
+  }
 };
 
 export const finishGame = async (id: string) => {
-    try {
-        const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
-        if (!room) throw error500("Room not found");
+  try {
+    const room = await roomModel.findById(new mongoose.Types.ObjectId(id));
+    if (!room) throw error500("Room not found");
 
-        updateRemainingTime(room);
+    updateRemainingTime(room);
 
-        room.timerStarted = false;
-        room.finished = true;
+    room.timerStarted = false;
+    room.finished = true;
 
-        await room.save();
+    await room.save();
 
-        roomsChangeEmitter.emitRoomsChange({
-            data: { id, black: room.black, white: room.white },
-            type: RoomsChangeType.ROOM_DELETE,
-        });
+    roomsChangeEmitter.emitRoomsChange({
+      data: { id, black: room.black, white: room.white },
+      type: RoomsChangeType.ROOM_DELETE,
+    });
 
-        return room;
-    } catch (error) {
-        throw error500("Couldn't remove room");
-    }
+    return room;
+  } catch (error) {
+    throw error500("Couldn't remove room");
+  }
 };
 
-export const subscribeRoomChange = (callback: (room: IRoomsChange) => void) => {
-    roomsChangeEmitter.onRoomChange(callback);
-    return () => roomsChangeEmitter.offRoomChange(callback);
+export const subscribeRoomChange = (
+  username: string,
+  callback: (room: IRoomsChange) => void
+) => {
+  roomsChangeEmitter.onRoomChange(username, callback);
+  return () => roomsChangeEmitter.offRoomChange(username);
 };
 
 // export const joinUserToRoom = async (username: string, roomId: string) => {

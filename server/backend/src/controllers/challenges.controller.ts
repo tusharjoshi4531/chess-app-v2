@@ -9,7 +9,7 @@ import {
     findChallenge,
 } from "../service/challenge.service";
 import _ from "lodash";
-import { IRoom, IRoomDoc } from "../model/room.model";
+import { IRoom } from "../model/room.model";
 import { createRoom, transformRoom } from "../service/room.service";
 
 export const addChallenge: RequestHandler = async (req, res, next) => {

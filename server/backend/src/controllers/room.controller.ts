@@ -25,7 +25,7 @@ export const subscribe: RequestHandler<
     res.write(`id: ${req.body.ssid}\n`);
     res.write(`data: ${JSON.stringify(roomMessage)}\n\n`);
 
-    const cleanUp = subscribeRoomChange((room) => {
+    const cleanUp = subscribeRoomChange(req.params.username, (room) => {
         
         const irreleventChange =
             (room.data as ISavedRoom).white !== req.params.username &&
