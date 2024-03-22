@@ -43,7 +43,15 @@ export const useSocket = () => {
   };
 
   const connect = () => {
-    if (socketRef.current.connected) return;
+    if (socketRef.current.connected) {
+      console.log("Already connected");
+      return;
+    }
+
+    if (!accessToken || !refreshToken) {
+      alert.error("No access token or refresh token");
+      return;
+    }
     socketRef.current.auth = {
       accessToken,
       refreshToken,

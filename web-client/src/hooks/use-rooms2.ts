@@ -53,14 +53,17 @@ export const useRooms = () => {
 
     connectSocket();
 
-    socket.on("rooms/initial-rooms", setRooms);
-    socket.on("rooms/room-insert", addRoom);
-    socket.on("rooms/room-delete", removeRoom);
+    socket.on("room/initial", setRooms);
+    socket.on("room/insert", addRoom);
+    socket.on("room/delete", removeRoom);
+
+    socket.emit("room/subscribe", { username });
 
     return () => {
-      socket.off("rooms/initial-rooms", setRooms);
-      socket.off("rooms/room-insert", addRoom);
-      socket.off("rooms/room-delete", removeRoom);
+      socket.off("room/initial", setRooms);
+      socket.off("room/insert", addRoom);
+      socket.off("room/delete", removeRoom);
+      socket.emit("room/unsubscribe", { username });
     };
   }, [
     username,

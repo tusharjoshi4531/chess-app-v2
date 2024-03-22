@@ -9,7 +9,7 @@ import HomepageContent from "./components/homepage/HomepageContent";
 import { useSocket } from "./hooks/use-socket";
 import GamePage from "./pages/GamePage";
 import { useNotification } from "./hooks/use-notification2";
-import { useRooms } from "./hooks/use-rooms";
+import { useRooms } from "./hooks/use-rooms2";
 
 import { Suspense, lazy } from "react";
 import OpenChallengePage from "./pages/OpenChallengePage";

@@ -51,16 +51,21 @@ export const useNotification = () => {
 
     connectSocket();
 
-    socket.on("notification/initial-notifications", setNotifications);
-    socket.on("notification/notification-insert", addNotification);
-    socket.on("notification/notification-delete", removeNotification);
+    socket.on("notification/initial", setNotifications);
+    socket.on("notification/insert", addNotification);
+    socket.on("notification/delete", removeNotification);
+
+    socket.on("notification/insert", (notification: INotification) => {
+      console.log("inserted notification", notification);
+    });
 
     socket.emit("notification/subscribe", { username });
 
     return () => {
-      socket.off("notification/initial-notifications", setNotifications);
-      socket.off("notification/notification-insert", addNotification);
-      socket.off("notification/notification-delete", removeNotification);
+      socket.off("notification/initial", setNotifications);
+      socket.off("notification/insert", addNotification);
+      socket.off("notification/delete", removeNotification);
+      socket.emit("notification/unsubscribe", { username });
     };
   }, [
     username,

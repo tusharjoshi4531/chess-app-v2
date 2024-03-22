@@ -31,7 +31,7 @@ export const useRooms = () => {
             dispatch(addRoomToRooms(room));
             alert.info(`You have joined a game room`);
         },
-        [alert.info, dispatch]
+        [alert, dispatch]
     );
 
     const setRooms = useCallback(
